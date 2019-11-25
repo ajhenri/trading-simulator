@@ -1,0 +1,20 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: "flask run"
+    ports: 
+      - "5000:5000"
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+    environment:
+      FLASK_ENV: development
+  postgres:
+    restart: always
+    image: "postgres:latest"
+    env_file:
+      - ./instance/db.env
+  redis:
+    image: "redis:alpine"
