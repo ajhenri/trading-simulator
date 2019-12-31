@@ -16,16 +16,17 @@ users_ns = Namespace('users', description='User API Functions')
 @users_ns.doc()
 class UserResource(BaseResource):
     def get(self, id):
-        user = session.query(User).filter_by(id=id).first()
-        if not user:
-            return self.error_response('User does not exist', 404)
+        with session_scope() as session:
+            user = session.query(User).filter_by(id=id).first()
+            if not user:
+                return self.error_response('User does not exist', 404)
 
-        schema = UserSchema()
-        try:
-            data = schema.dumps(user)
-        except ValidationError as err:
-            logging.debug(err)
-            return self.error_response(err.messages)
+            schema = UserSchema()
+            try:
+                data = schema.dump(user)
+            except ValidationError as err:
+                logging.debug(err)
+                return self.error_response(err.messages)
         return data, 200
 
     def patch(self, id):
