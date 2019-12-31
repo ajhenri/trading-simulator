@@ -3,24 +3,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Binary, DateTime
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
-from app.core.db import session
-
 Base = declarative_base()
-
-class BaseMixin(object):
-    @classmethod
-    def query(cls):
-        return session.query(cls)
-
-    @classmethod
-    def get(cls, id):
-        return cls.query.get(id)
-
-    def save(self):
-        db.session.add(self)
-
-    def delete(self):
-        db.session.delete(self)
 
 class OauthGrantMixin(object):
     @declared_attr
@@ -42,7 +25,7 @@ class OauthGrantMixin(object):
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    username = Column(String(80), nullable=False)
+    username = Column(String(80), unique=True, nullable=False)
     password = Column(Binary(60), nullable=False)
     first_name = Column(String(50))
     last_name = Column(String(50))
