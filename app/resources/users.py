@@ -15,7 +15,19 @@ users_ns = Namespace('users', description='User API Functions')
 
 @users_ns.doc()
 class UserResource(BaseResource):
+    """
+    Resource for API Users
+    """
     def get(self, id):
+        """
+        Get user information based on user ID.
+        Returns an HTTP 404 error if user doesn't exist.
+
+        Params
+        ------
+        id: int
+            The identifier of the user
+        """
         with session_scope() as session:
             user = session.query(User).filter_by(id=id).first()
             if not user:
@@ -28,11 +40,11 @@ class UserResource(BaseResource):
                 logging.debug(err)
                 return self.error_response(err.messages)
         return data, 200
-
-    def patch(self, id):
-        api.abort(403)
     
     def post(self):
+        """
+        Creates a new user, and creates a client associated with that user assigned to the default scope.
+        """
         schema = UserSchema()
         try:
             data = schema.loads(request.get_data())
