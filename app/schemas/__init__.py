@@ -50,3 +50,4 @@ class AccountPositionSchema(ma.Schema):
     bought_on = ma.DateTime(missing=datetime.today())
     number_of_shares = ma.Integer(required=True, data_key='shares')
     ticker = ma.Str(required=True, validate=validate.Length(min=1, max=5))
+    trade = ma.Str(load_only=True, validate=validate.OneOf(choices=['buy', 'sell']))

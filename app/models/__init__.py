@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, ForeignKey, Integer, String, Binary, DateTime, Numeric
+from sqlalchemy import Column, ForeignKey, Enum, Integer, String, Binary, DateTime, Numeric
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
@@ -29,7 +29,7 @@ class User(Base):
     password = Column(Binary(60), nullable=False)
     first_name = Column(String(50))
     last_name = Column(String(50))
-    client = relationship("OauthClient", uselist=False, back_populates="user")
+    client = relationship('OauthClient', uselist=False, back_populates='user')
     account = relationship('Account', uselist=False, backref='users')
 
 class OauthScope(Base):
@@ -44,15 +44,15 @@ class OauthClient(Base):
     client_secret = Column(String(64), nullable=False)
     redirect_uri = Column(String(2048), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship("User", back_populates="client")
-    scopes = relationship("OauthClientScope")
+    user = relationship('User', back_populates='client')
+    scopes = relationship('OauthClientScope')
 
 class OauthClientScope(Base):
     __tablename__ = 'oauth_client_scopes'
     id = Column(Integer, primary_key=True)
     client_id = Column(String(32), ForeignKey('oauth_clients.client_id'))
     scope_id = Column(Integer, ForeignKey('oauth_scopes.id'))
-    scope = relationship("OauthScope")
+    scope = relationship('OauthScope')
 
 class OauthAccessToken(Base, OauthGrantMixin):
     __tablename__ = 'oauth_access_tokens'
@@ -95,3 +95,17 @@ class Position(Base):
         nullable=False)
     number_of_shares = Column(Integer, nullable=False)
     ticker = Column(String(5), unique=True, nullable=False)
+
+class TradeLogEntry(Base):
+    __tablename__ = 'trade_log'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, nullable=False)
+    account_id = Column(Integer, nullable=False)
+    position_id = Column(Integer, nullable=False)
+    trade_type = Column(Enum('buy', 'sell', native_enum=False), nullable=False)
+    process_date = Column(DateTime, nullable=False, default=datetime.now)
+    price = Column(
+        Numeric(precision=19, scale=2, asdecimal=False, decimal_return_scale=None), 
+        nullable=False)
+    number_of_shares = Column(Integer, nullable=False)
+    ticker = Column(String(5), nullable=False)
