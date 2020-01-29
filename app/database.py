@@ -13,10 +13,10 @@ def init_db(app):
     Initialize the DB and Redis storage mediums with constant values provided 
     by Flask's application object.
     A global "Redis" object, SQLAlchemy engine, and SQLAlchemy Session are created.
-
+    
     Params
     ------
-    app (:class:`flask.Flask`)
+    app : The application object, an instance of `flask.Flask`.
     """
     global engine, Session, redis
 
@@ -30,10 +30,6 @@ def init_db(app):
     Session = scoped_session(sessionmaker(bind=engine))
 
     redis = Redis(host='redis', db=0, socket_connect_timeout=2, socket_timeout=2)
-
-    from app import models
-    
-    models.Base.metadata.create_all(bind=engine)
 
 @contextmanager
 def session_scope():
