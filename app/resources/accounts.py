@@ -5,7 +5,7 @@ from flask import request
 from marshmallow import ValidationError
 from flask_restplus import Namespace, Resource, fields
 
-from app.core.db import session_scope
+from app.database import session_scope
 from app.schemas import AccountSchema, AccountCreationSchema, \
     AccountPositionSchema
 from app.models import Account, Position, TradeLogEntry
@@ -15,7 +15,6 @@ from app.services.third_party.wtd import WorldTradingData
 
 accounts_ns = Namespace('accounts', description='Account API Functions')
 
-@accounts_ns.route('/')
 @accounts_ns.doc()
 class AccountResource(BaseResource):
     def get(self, id):
@@ -28,38 +27,36 @@ class AccountResource(BaseResource):
         id : int
             Account identifier.
         """
-        with session_scope() as session:
-            account = session.query(Account).filter_by(id=id).first()
-            if not account:
-                return self.error_response('Account does not exist', 404)
+        try:
+            with session_scope() as session:
+                account = session.query(Account).filter_by(id=id).first()
+                if not account:
+                    return self.error_response('Account does not exist', 404)
 
-            positions = {}
-            for position in account.positions:
-                positions[position.ticker] = {
-                    'id': position.id, 
-                    'ticker': position.ticker, 
-                    'shares': position.number_of_shares,
-                    'bought_at': position.bought_at
-                }
+                positions = {}
+                for position in account.positions:
+                    positions[position.ticker] = {
+                        'id': position.id, 
+                        'ticker': position.ticker, 
+                        'shares': position.number_of_shares,
+                        'bought_at': position.bought_at
+                    }
 
-            stock_list = positions.keys()
-            stocks = WorldTradingData().get_stocks(stock_list)
-            stocks = stocks['data']
-            for stock in stocks:
-                if stock['symbol'] in positions:
-                    positions[stock['symbol']]['price'] = float(stock['price'])
+                stock_list = positions.keys()
+                if len(stock_list) > 0:
+                    stocks = WorldTradingData().get_stocks(stock_list)
+                    stocks = stocks['data']
+                    for stock in stocks:
+                        if stock['symbol'] in positions:
+                            positions[stock['symbol']]['price'] = float(stock['price'])
 
-            try:
                 schema = AccountSchema()
                 data = schema.dump(account)
                 data['positions'] = positions
-            except ValidationError as err:
-                logging.debug(err)
-                return self.error_response(err.messages)
-            except Exception as e:
-                logging.error(str(e))
-                return self.error_response(self.DEFAULT_ERROR_MESSAGE)
-            
+        except Exception as e:
+            logging.error(str(e))
+            return self.error_response(self.DEFAULT_ERROR_MESSAGE)            
+
         return self.success_response(data)
 
     def patch(self, id):
@@ -111,7 +108,7 @@ class AccountResource(BaseResource):
             logging.debug(err)
             return self.error_response(err.messages)
         except Exception as err:
-            logging.debug(str(err))
+            logging.error(str(err))
             return self.error_response(self.DEFAULT_ERROR_MESSAGE)
 
         if not created_account_id:
@@ -134,14 +131,12 @@ class AccountResource(BaseResource):
                     return self.error_response('Account does not exist', 400)
                 account.delete()
         except Exception as err:
-            logging.debug(str(err))
+            logging.error(str(err))
             return self.error_response('Error deleting account')
         return self.success_response(result='ok')
 
 @accounts_ns.doc()
 class AccountPositionResource(BaseResource):
-    BROKERAGE_FEE = decimal.Decimal(1.99)
-
     def put(self, id, position_id):
         """
         Trade (buy or sell) more of the specified position.
@@ -157,7 +152,7 @@ class AccountPositionResource(BaseResource):
         try:
             schema = AccountPositionSchema()
             data = schema.loads(request.get_data())
-            cost = calculate_trade(data['number_of_shares'], data['bought_at'], self.BROKERAGE_FEE)
+            cost = calculate_trade(data['number_of_shares'], data['bought_at'], Account.BROKERAGE_FEE)
 
             with session_scope() as session:
                 account = session.query(Account).\
@@ -165,7 +160,7 @@ class AccountPositionResource(BaseResource):
                     filter(Account.id == id, Position.id == position_id).first()
 
                 if not account:
-                    return self.error_response('Cannot find position for this account', 404)
+                    return self.error_response('Position does not exist', 404)
 
                 position = account.positions[0]
                 if data['trade'] == 'buy':
@@ -197,7 +192,7 @@ class AccountPositionResource(BaseResource):
             logging.debug(err)
             return self.error_response(err.messages)
         except Exception as err:
-            logging.debug(str(err))
+            logging.error(str(err))
             return self.error_response(self.DEFAULT_ERROR_MESSAGE)
         return self.success_response('ok')
 
@@ -216,12 +211,12 @@ class AccountPositionResource(BaseResource):
             data = schema.loads(request.get_data())
             data['account_id'] = id
 
-            cost = calculate_trade(data['number_of_shares'], data['bought_at'], self.BROKERAGE_FEE)
+            data['cost'] = calculate_trade(data['number_of_shares'], data['bought_at'], Account.BROKERAGE_FEE)
             with session_scope() as session:
                 account = session.query(Account).filter_by(id=id).first()
                 if not account:
-                    return self.error_response('Account does not exist', 400)
-                if account.cash_amount < cost:
+                    return self.error_response('Account does not exist', 404)
+                if account.cash_amount < data['cost']:
                     return self.success_response(result='Not enough funds to buy this position', success=False)
 
                 existing_p = session.query(Position).filter_by(account_id=id, ticker=data['ticker']).first()
@@ -234,8 +229,8 @@ class AccountPositionResource(BaseResource):
 
                 p_id = p.id
                 if p_id:
-                    account.cash_amount -= cost
-                    account.equity_amount += cost
+                    account.cash_amount -= data['cost']
+                    account.equity_amount += data['cost']
                     result['id'] = p_id
                     result['account'] = {'cash': account.cash_amount, 'equity': account.equity_amount}
 
@@ -253,7 +248,7 @@ class AccountPositionResource(BaseResource):
             logging.debug(err)
             return self.error_response(err.messages)
         except Exception as err:
-            logging.debug(str(err))
+            logging.error(str(err))
             return self.error_response(self.DEFAULT_ERROR_MESSAGE)
 
         if not p_id:
@@ -275,7 +270,7 @@ class AccountPositionResource(BaseResource):
             with session_scope() as session:
                 account = session.query(Account).filter_by(id=id).first()
                 if not account:
-                    return self.error_response('Account does not exist', 400)
+                    return self.error_response('Account does not exist', 404)
                 position = session.query(Position).filter_by(id=position_id, account_id=id).first()
 
                 stocks = WorldTradingData().get_stocks([position.ticker])
@@ -286,7 +281,7 @@ class AccountPositionResource(BaseResource):
                 data = stock['data']['result'][0]
                 
                 sale = round((position.number_of_shares*decimal.Decimal(data['price'])), 2)
-                sale -= self.BROKERAGE_FEE
+                sale -= Account.BROKERAGE_FEE
 
                 log = TradeLogEntry(
                     user_id=account.user_id,
@@ -303,11 +298,11 @@ class AccountPositionResource(BaseResource):
 
                 session.add(log)
         except Exception as err:
-            logging.debug(str(err))
+            logging.error(str(err))
             return self.error_response(self.DEFAULT_ERROR_MESSAGE)
         return self.success_response(result='ok')
 
-accounts_ns.add_resource(AccountResource, '/', methods=['POST'])
+accounts_ns.add_resource(AccountResource, '', methods=['POST'])
 accounts_ns.add_resource(AccountResource, '/<id>', methods=['GET', 'PATCH', 'DELETE'])
 accounts_ns.add_resource(AccountPositionResource, '/<id>/positions', methods=['POST'])
 accounts_ns.add_resource(AccountPositionResource, '/<id>/positions/<position_id>', methods=['PUT', 'DELETE'])
