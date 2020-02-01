@@ -4,10 +4,12 @@ from marshmallow import validate, post_load
 
 from app.extensions import ma
 
-class UserSchema(ma.Schema):
+class UserVerifySchema(ma.Schema):
+    username = ma.Str(required=True, validate=validate.Length(min=2, max=80))
+    password = ma.Str(required=True, validate=validate.Length(min=8, max=30), load_only=True)
+
+class UserSchema(UserVerifySchema):
     id = ma.Integer(dump_only=True)
-    username = ma.Str(required=True)
-    password = ma.Str(required=True, load_only=True)
     first_name = ma.Str(required=True)
     last_name = ma.Str(required=True)
 
