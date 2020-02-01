@@ -1,9 +1,21 @@
+from decimal import Decimal
 from datetime import datetime
 from sqlalchemy import Column, ForeignKey, Enum, Integer, String, Binary, DateTime, Numeric
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
 Base = declarative_base()
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(80), unique=True, nullable=False)
+    password = Column(Binary(60), nullable=False)
+    salt = Column(Binary(40), nullable=False)
+    first_name = Column(String(50))
+    last_name = Column(String(50))
+    client = relationship('OauthClient', uselist=False, back_populates='user')
+    account = relationship('Account', uselist=False, backref='users')
 
 class OauthGrantMixin(object):
     @declared_attr
@@ -21,16 +33,6 @@ class OauthGrantMixin(object):
     @declared_attr
     def scope(cls):
         return Column(String(100), nullable=False)
-
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(80), unique=True, nullable=False)
-    password = Column(Binary(60), nullable=False)
-    first_name = Column(String(50))
-    last_name = Column(String(50))
-    client = relationship('OauthClient', uselist=False, back_populates='user')
-    account = relationship('Account', uselist=False, backref='users')
 
 class OauthScope(Base):
     __tablename__ = 'oauth_scopes'
@@ -68,6 +70,8 @@ class OauthAuthorizationCode(Base, OauthGrantMixin):
     redirect_uri = Column(String(2048), nullable=False)
 
 class Account(Base):
+    BROKERAGE_FEE = Decimal('1.99')
+
     __tablename__ = 'accounts'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'))
