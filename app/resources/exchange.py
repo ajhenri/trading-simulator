@@ -21,17 +21,17 @@ class ExchangeResource(BaseResource):
         return self.success_response(results)
 
 @exchange_ns.doc()
-@exchange_ns.route('/search/<ticker>')
+@exchange_ns.route('/search/<symbol>')
 class ExchangeSearchResource(BaseResource):
-    def get(self, ticker):
+    def get(self, symbol):
         """
-        Search for stock with ticker specified.
+        Search for stock with symbol specified.
 
         Params
         ------
-        ticker : str
-            The stock ticker (e.g. TSLA, APPL)
+        symbol : str
+            The stock symbol (e.g. TSLA, APPL)
         """
         api = WorldTradingData()
-        data = api.search(ticker)
+        data = api.search(symbol)
         return self.success_response(data['data'])

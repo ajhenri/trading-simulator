@@ -1,0 +1,8 @@
+DEFAULT = 'An unexpected error occurred while processing this request'
+ACCOUNT_DNE = 'Account does not exist'
+ACCOUNT_EXISTS = 'Account already exists for this user'
+STOCK_DNE = 'Stock does not exist'
+STOCK_EXISTS = 'Stock already exists'
+STOCK_DATA_UNAVAILABLE = 'Stock data is currently unavailable'
+NOT_ENOUGH_FUNDS = 'Not enough funds to make this trade'
+TOO_MANY_SHARES = 'Shares passed is greater than what is owned'
