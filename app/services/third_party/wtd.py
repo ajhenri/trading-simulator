@@ -9,32 +9,32 @@ class WorldTradingData(BaseAPI):
         super().__init__(current_app.config['WTD_API_URL'], 'api_token', 
             current_app.config['WTD_API_KEY'])
     
-    def get_stocks(self, tickers):
+    def get_stocks(self, symbols):
         """
         Get a list of stocks from WTD.
 
         Params
         ------
-        tickers: list
-            The list of tickers to get information for.
+        symbols: list
+            The list of symbols to get information for.
         """
         return self._query_endpoint('stock', {
-            'symbol': ",".join(tickers),
+            'symbol': ",".join(symbols),
             'sort_order': 'asc',
             'sort_by': 'symbol'
         })
 
-    def search(self, ticker, page=1):
+    def search(self, symbol, page=1):
         """
-        Search for specified ticker in WTD.
+        Search for specified symbol in WTD.
 
         Params
         ------
-        ticker: str
-            The ticker to search for.
+        symbol: str
+            The symbol to search for.
         """
         stock_list = self._query_endpoint('stock_search', {
-            'search_term': ticker,
+            'search_term': symbol,
             'search_by': 'symbol',
             'stock_exchange': 'NASDAQ,NYSE',
             'page': page

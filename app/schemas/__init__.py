@@ -46,10 +46,21 @@ class AccountCreationSchema(ma.Schema):
         data['cash_amount'] = data['initial_amount']
         return data
 
-class AccountPositionSchema(ma.Schema):
+class AccountUpdateSchema(ma.Schema):
+    amount = ma.Decimal(required=True)
+
+class TradeSchema(ma.Schema):
     account_id = ma.Integer(dump_only=True)
-    bought_at = ma.Decimal(required=True, data_key='price')
-    bought_on = ma.DateTime(missing=datetime.today())
-    number_of_shares = ma.Integer(required=True, data_key='shares')
-    ticker = ma.Str(required=True, validate=validate.Length(min=1, max=5))
-    trade = ma.Str(load_only=True, validate=validate.OneOf(choices=['buy', 'sell']))
+    price = ma.Decimal(required=True)
+    process_date = ma.DateTime(missing=datetime.today())
+    shares = ma.Integer(required=True, validate=validate.Range(min=1))
+    symbol = ma.Str(required=True, validate=validate.Length(min=1, max=5))
+    trade_type = ma.Str(load_only=True, validate=validate.OneOf(choices=['buy', 'sell']))
+    
+    @post_load
+    def calculate_trade(self, data, **kwargs):
+        """
+        Determine total amount of a trade.
+        """
+        data['amount'] = round(Decimal(shares*price), 2)
+        return data
