@@ -84,32 +84,32 @@ class Account(Base):
     initial_amount = Column(
         Numeric(precision=19, scale=2, asdecimal=False, decimal_return_scale=None), 
         default=0.00)
-    positions = relationship('Position')
+    stocks = relationship('Stock')
 
-class Position(Base):
-    __tablename__ = 'positions'
+class Stock(Base):
+    __tablename__ = 'stocks'
     id = Column(Integer, primary_key=True)
     account_id = Column(Integer, ForeignKey('accounts.id'))
     bought_at = Column(
         Numeric(precision=19, scale=2, asdecimal=False, decimal_return_scale=None), 
         nullable=False)
     bought_on = Column(DateTime, nullable=False)
-    cost = Column(
+    sold_on = Column(DateTime, default=None)
+    initial_cost = Column(
         Numeric(precision=19, scale=2, asdecimal=False, decimal_return_scale=None), 
         nullable=False)
-    number_of_shares = Column(Integer, nullable=False)
-    ticker = Column(String(5), unique=True, nullable=False)
+    shares = Column(Integer, nullable=False)
+    symbol = Column(String(5), unique=True, nullable=False)
 
-class TradeLogEntry(Base):
-    __tablename__ = 'trade_log'
+class Trade(Base):
+    __tablename__ = 'trades'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, nullable=False)
     account_id = Column(Integer, nullable=False)
-    position_id = Column(Integer, nullable=False)
+    stock_id = Column(Integer, nullable=False)
     trade_type = Column(Enum('buy', 'sell', native_enum=False), nullable=False)
     process_date = Column(DateTime, nullable=False, default=datetime.now)
     price = Column(
         Numeric(precision=19, scale=2, asdecimal=False, decimal_return_scale=None), 
         nullable=False)
-    number_of_shares = Column(Integer, nullable=False)
-    ticker = Column(String(5), nullable=False)
+    shares = Column(Integer, nullable=False)
