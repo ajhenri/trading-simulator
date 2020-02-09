@@ -7,7 +7,7 @@ from marshmallow import ValidationError
 from flask_restplus import Namespace, Resource, fields
 
 from app.database import session_scope
-from app.resources.base_resource import BaseResource
+from app.resources.base_resource import BaseResource, validate_request_json
 from app.models import User, OauthClient, OauthClientScope
 from app.schemas import UserVerifySchema, UserSchema, ClientSchema
 
@@ -15,37 +15,29 @@ users_ns = Namespace('users', description='User API Functions')
 
 @users_ns.doc()
 class UserVerifyResource(BaseResource):
-    """
-    Verifying Users
-    """
+    @validate_request_json
     def post(self):
         """
         Checks database for user of given `username` and compares 
         passwords for login verification.
         """
+        schema = UserVerifySchema()
         try:
-            schema = UserVerifySchema()
             data = schema.loads(request.get_data())
-            with session_scope() as session:
-                user = session.query(User).filter_by(username=data['username']).first()
-                if not user:
-                    return self.success_response(result=False)
-
-                password = bcrypt.hashpw(data['password'].encode(), user.salt)
-                verify = password == user.password
-                return self.success_response(result=verify)
         except ValidationError as err:
-            logging.debug(err)
-            return self.error_response(err.messages)
-        except Exception as err:
-            logging.debug(str(err))
-            return self.error_response(self.DEFAULT_ERROR_MESSAGE)
+            return self.error_response(err.messages, self.HTTP_BAD_REQUEST)
+
+        with session_scope() as session:
+            user = session.query(User).filter_by(username=data['username']).first()
+            if not user:
+                return self.success_response(result=False)
+
+            password = bcrypt.hashpw(data['password'].encode(), user.salt)
+            verify = password == user.password
+            return self.success_response(result=verify)
 
 @users_ns.doc()
 class UserResource(BaseResource):
-    """
-    Resource for API Users
-    """
     def get(self, id):
         """
         Get user information based on user ID.
@@ -62,13 +54,12 @@ class UserResource(BaseResource):
                 return self.error_response('User does not exist', 404)
 
             schema = UserSchema()
-            try:
-                data = schema.dump(user)
-            except ValidationError as err:
-                logging.debug(err)
-                return self.error_response(err.messages)
+            data = schema.dump(user)
+            if user.account:
+                data['account_id'] = user.account.id
         return self.success_response(data)
     
+    @validate_request_json
     def post(self):
         """
         Creates a new user, and creates a client associated with that user assigned to the default scope.
@@ -77,11 +68,7 @@ class UserResource(BaseResource):
         try:
             data = schema.loads(request.get_data())
         except ValidationError as err:
-            logging.debug(err)
-            return self.error_response(err.messages)
-        except Exception as err:
-            logging.debug(str(err))
-            return self.error_response('Error parsing JSON request')
+            return self.error_response(err.messages, self.HTTP_BAD_REQUEST)
         
         user_id = client_id = None
         try:
@@ -146,5 +133,5 @@ class UserResource(BaseResource):
             success=True, status_code=201)
 
 users_ns.add_resource(UserResource, '', methods=['POST'])
-users_ns.add_resource(UserResource, '/<id>', methods=['GET', 'PATCH'])
+users_ns.add_resource(UserResource, '/<int:id>', methods=['GET', 'PATCH'])
 users_ns.add_resource(UserVerifyResource, '/verify', methods=['POST'])

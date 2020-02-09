@@ -1,6 +1,7 @@
 from decimal import Decimal
 from datetime import datetime
 from marshmallow import validate, post_load
+from marshmallow.fields import Float
 
 from app.extensions import ma
 
@@ -28,18 +29,18 @@ class ClientScopeSchema(ma.Schema):
     client_id = ma.Str(required=True, validate=validate.Length(equal=32))
     scope_id = ma.Integer(required=True)
 
-class AccountSchema(ma.Schema):
-    id = ma.Integer(dump_only=True)
-    user_id = ma.Integer(required=True, load_only=True)
-    cash_amount = ma.Str(required=True)
-    equity_amount = ma.Str(required=True)
-    initial_amount = ma.Str(required=True)
-    last_name = ma.Str(required=True)
+class AccountReadSchema(ma.Schema):
+    id = ma.Integer()
+    user_id = ma.Integer()
+    cash_amount = ma.Decimal(places=2, as_string=True)
+    equity_amount = ma.Decimal(places=2, as_string=True)
+    initial_amount = ma.Decimal(places=2, as_string=True)
+    last_name = ma.Str()
 
 class AccountCreationSchema(ma.Schema):
     user_id = ma.Integer(required=True)
-    equity_amount = ma.Decimal(default=Decimal(0.00))
-    initial_amount = ma.Decimal(required=True)
+    equity_amount = Float(default=float(0.00), validate=validate.Range(min=500))
+    initial_amount = Float(required=True, validate=validate.Range(min=500))
 
     @post_load
     def set_cash_amount(self, data, **kwargs):
@@ -47,11 +48,11 @@ class AccountCreationSchema(ma.Schema):
         return data
 
 class AccountUpdateSchema(ma.Schema):
-    amount = ma.Decimal(required=True)
+    amount = Float(required=True, validate=validate.Range(min=20))
 
 class TradeSchema(ma.Schema):
     account_id = ma.Integer(dump_only=True)
-    price = ma.Decimal(required=True)
+    price = Float(required=True, validate=validate.Range(min=0))
     process_date = ma.DateTime(missing=datetime.today())
     shares = ma.Integer(required=True, validate=validate.Range(min=1))
     symbol = ma.Str(required=True, validate=validate.Length(min=1, max=5))
@@ -62,5 +63,5 @@ class TradeSchema(ma.Schema):
         """
         Determine total amount of a trade.
         """
-        data['amount'] = round(Decimal(shares*price), 2)
+        data['amount'] = round(float(data['shares']*data['price']), 2)
         return data
