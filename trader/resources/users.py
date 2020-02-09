@@ -6,10 +6,10 @@ from flask import request
 from marshmallow import ValidationError
 from flask_restplus import Namespace, Resource, fields
 
-from app.database import session_scope
-from app.resources.base_resource import BaseResource, validate_request_json
-from app.models import User, OauthClient, OauthClientScope
-from app.schemas import UserVerifySchema, UserSchema, ClientSchema
+from trader.database import session_scope
+from trader.resources.base_resource import BaseResource, validate_request_json
+from trader.models import User, OauthClient, OauthClientScope
+from trader.schemas import UserVerifySchema, UserSchema, ClientSchema
 
 users_ns = Namespace('users', description='User API Functions')
 

@@ -1,13 +1,13 @@
 from . import BaseAPI
-from flask import current_app
+from flask import current_app as app
 
 class WorldTradingData(BaseAPI):
     """
     Serves as an interface to the World Trading Data API.
     """
     def __init__(self):
-        super().__init__(current_app.config['WTD_API_URL'], 'api_token', 
-            current_app.config['WTD_API_KEY'])
+        super().__init__(app.config['WTD_API_URL'], 'api_token', 
+            app.config['WTD_API_KEY'])
     
     def get_stocks(self, symbols):
         """

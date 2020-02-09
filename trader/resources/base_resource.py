@@ -4,7 +4,7 @@ from functools import wraps
 from flask import request, jsonify
 from flask_restplus import Resource
 
-from app.lib import errors
+from trader.lib import errors
 
 class BaseResource(Resource):
     HTTP_OK = 200

@@ -8,10 +8,10 @@ from flask import Flask
 from werkzeug.exceptions import HTTPException
 from flask_restplus import Api, Resource, fields
 
-from app.lib import errors
-from app.extensions import ma
-from app.database import init_db
-from app.resources import API_NAMESPACES
+from trader.lib import errors
+from trader.extensions import ma
+from trader.database import init_db
+from trader.resources import API_NAMESPACES
 
 # Simple logging setup
 file_handler = logging.handlers.RotatingFileHandler('./logs/trading-simulator.log', maxBytes=10000)
@@ -38,7 +38,7 @@ def create_app():
     for ns in API_NAMESPACES:
         api.add_namespace(*ns)
 
-    from app.database import redis
+    from trader.database import redis
 
     @app.route("/test")
     def test():
@@ -47,7 +47,7 @@ def create_app():
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
-        from app.database import Session
+        from trader.database import Session
         Session.remove()
 
     @app.errorhandler(Exception)

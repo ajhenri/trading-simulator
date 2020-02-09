@@ -6,13 +6,13 @@ from flask import request
 from marshmallow import ValidationError
 from flask_restplus import Namespace, Resource, fields
 
-from app.lib import errors
-from app.database import session_scope
-from app.schemas import AccountReadSchema, AccountCreationSchema, \
+from trader.lib import errors
+from trader.database import session_scope
+from trader.schemas import AccountReadSchema, AccountCreationSchema, \
     AccountUpdateSchema, TradeSchema
-from app.models import Account, Stock, Trade
-from app.resources.base_resource import BaseResource, validate_request_json
-from app.services.third_party.wtd import WorldTradingData
+from trader.models import Account, Stock, Trade
+from trader.resources.base_resource import BaseResource, validate_request_json
+from trader.services.third_party.wtd import WorldTradingData
 
 accounts_ns = Namespace('accounts', description='Account API Functions')
 

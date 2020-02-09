@@ -21,7 +21,7 @@ config.set_main_option('sqlalchemy.url', sqlalchemy_url)
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 
-from app.models import Base
+from trader.models import Base
 target_metadata = Base.metadata
 
 def run_migrations_offline():

@@ -3,7 +3,7 @@ from datetime import datetime
 from marshmallow import validate, post_load
 from marshmallow.fields import Float
 
-from app.extensions import ma
+from trader.extensions import ma
 
 class UserVerifySchema(ma.Schema):
     username = ma.Str(required=True, validate=validate.Length(min=2, max=80))

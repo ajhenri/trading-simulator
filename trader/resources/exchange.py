@@ -1,8 +1,8 @@
 from flask import request
 from flask_restplus import Namespace, Resource, fields
 
-from app.resources.base_resource import BaseResource
-from app.services.third_party.wtd import WorldTradingData
+from trader.resources.base_resource import BaseResource
+from trader.services.third_party.wtd import WorldTradingData
 
 exchange_ns = Namespace('exchange', description='Exchange API Functions')
 
