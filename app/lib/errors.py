@@ -1,6 +1,8 @@
 DEFAULT = 'An unexpected error occurred while processing this request'
+INVALID_JSON = 'Unable to parse JSON from the request body'
 ACCOUNT_DNE = 'Account does not exist'
 ACCOUNT_EXISTS = 'Account already exists for this user'
+ACCOUNT_INVALID_ACTION = 'Invalid action for account'
 STOCK_DNE = 'Stock does not exist'
 STOCK_EXISTS = 'Stock already exists'
 STOCK_DATA_UNAVAILABLE = 'Stock data is currently unavailable'
