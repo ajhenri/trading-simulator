@@ -6,7 +6,7 @@ from flask import request
 from marshmallow import ValidationError
 from flask_restplus import Namespace, Resource, fields
 
-from trader.database import session_scope
+from trader.extensions import db
 from trader.resources.base_resource import BaseResource, validate_request_json
 from trader.models import User, OauthClient, OauthClientScope
 from trader.schemas import UserVerifySchema, UserSchema, ClientSchema
@@ -27,7 +27,7 @@ class UserVerifyResource(BaseResource):
         except ValidationError as err:
             return self.error_response(err.messages, self.HTTP_BAD_REQUEST)
 
-        with session_scope() as session:
+        with db.session_scope() as session:
             user = session.query(User).filter_by(username=data['username']).first()
             if not user:
                 return self.success_response(result=False)
@@ -48,7 +48,7 @@ class UserResource(BaseResource):
         id: int
             The identifier of the user
         """
-        with session_scope() as session:
+        with db.session_scope() as session:
             user = session.query(User).filter_by(id=id).first()
             if not user:
                 return self.error_response('User does not exist', 404)
@@ -72,7 +72,7 @@ class UserResource(BaseResource):
         
         user_id = client_id = None
         try:
-            with session_scope() as session:
+            with db.session_scope() as session:
                 user = session.query(User).filter_by(username=data['username']).first()
                 if user:
                     return self.error_response('User already exists')

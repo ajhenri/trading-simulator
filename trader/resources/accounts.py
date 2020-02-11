@@ -7,7 +7,7 @@ from marshmallow import ValidationError
 from flask_restplus import Namespace, Resource, fields
 
 from trader.lib import errors
-from trader.database import session_scope
+from trader.extensions import db
 from trader.schemas import AccountReadSchema, AccountCreationSchema, \
     AccountUpdateSchema, TradeSchema
 from trader.models import Account, Stock, Trade
@@ -28,7 +28,7 @@ class AccountResource(BaseResource):
         id : int
             Account identifier.
         """
-        with session_scope() as session:
+        with db.session_scope() as session:
             account = session.query(Account).filter_by(id=id).first()
             if not account:
                 return self.error_response(errors.ACCOUNT_DNE, self.HTTP_NOT_FOUND)
@@ -71,7 +71,7 @@ class AccountResource(BaseResource):
         if action not in ['withdraw', 'deposit']:
             return self.error_response(errors.ACCOUNT_INVALID_ACTION, self.HTTP_BAD_REQUEST)
 
-        with session_scope() as session:
+        with db.session_scope() as session:
             account = session.query(Account).filter_by(id=id).first()
             if not account:
                 return self.error_response(errors.ACCOUNT_DNE, self.HTTP_NOT_FOUND)
@@ -101,7 +101,7 @@ class AccountResource(BaseResource):
         except ValidationError as err:
             return self.error_response(err.messages)
         
-        with session_scope() as session:
+        with db.session_scope() as session:
             account = session.query(Account).filter_by(user_id=data['user_id']).first()
             if account:
                 return self.error_response(errors.ACCOUNT_EXISTS, self.HTTP_BAD_REQUEST)
@@ -123,7 +123,7 @@ class AccountResource(BaseResource):
         id : int
             Account identifier.
         """
-        with session_scope() as session:
+        with db.session_scope() as session:
             account = session.query(Account).filter_by(id=id)
             if not account:
                 return self.error_response(errors.ACCOUNT_DNE, self.HTTP_NOT_FOUND)
@@ -151,7 +151,7 @@ class StockResource(BaseResource):
         except ValidationError as err:
             return self.error_response(err.messages)
         
-        with session_scope() as session:
+        with db.session_scope() as session:
             account = session.query(Account).\
                 join(Account.stocks).\
                 filter(Account.id == id, Stock.id == stock_id, Stock.symbol == data['symbol']).first()
@@ -173,7 +173,7 @@ class StockResource(BaseResource):
                 if stock.shares < data['shares']:
                     return self.success_response(result=errors.TOO_MANY_SHARES, success=False)
                 if stock.shares == data['shares']:
-                    stock.sold_on = datetime.now
+                    stock.sold_on = data['process_date']
                 stock.shares -= data['shares']
                 account.cash_amount -= Account.BROKERAGE_FEE
                 account.cash_amount += data['amount']
@@ -209,7 +209,7 @@ class StockResource(BaseResource):
         data['account_id'] = id
         trade_type = 'buy'
         
-        with session_scope() as session:
+        with db.session_scope() as session:
             account = session.query(Account).filter_by(id=id).first()
             if not account:
                 return self.error_response(errors.ACCOUNT_DNE, self.HTTP_NOT_FOUND)
