@@ -8,7 +8,7 @@ from flask_restplus import Namespace, Resource, fields
 
 from trader.extensions import db
 from trader.resources.base_resource import BaseResource, validate_request_json
-from trader.models import User, OauthClient, OauthClientScope
+from trader.models import User
 from trader.schemas import UserVerifySchema, UserSchema, ClientSchema
 
 users_ns = Namespace('users', description='User API Functions')
@@ -18,7 +18,7 @@ class UserVerifyResource(BaseResource):
     @validate_request_json
     def post(self):
         """
-        Checks database for user of given `username` and compares 
+        Checks database for user of given `email` and compares 
         passwords for login verification.
         """
         schema = UserVerifySchema()
@@ -28,7 +28,7 @@ class UserVerifyResource(BaseResource):
             return self.error_response(err.messages, self.HTTP_BAD_REQUEST)
 
         with db.session_scope() as session:
-            user = session.query(User).filter_by(username=data['username']).first()
+            user = session.query(User).filter_by(email=data['email']).first()
             if not user:
                 return self.success_response(result=False)
 
@@ -73,7 +73,7 @@ class UserResource(BaseResource):
         user_id = client_id = None
         try:
             with db.session_scope() as session:
-                user = session.query(User).filter_by(username=data['username']).first()
+                user = session.query(User).filter_by(email=data['email']).first()
                 if user:
                     return self.error_response('User already exists')
 
@@ -81,7 +81,7 @@ class UserResource(BaseResource):
                 hashed_pw = bcrypt.hashpw(data['password'].encode(), salt)
 
                 user_input = {
-                    'username': data['username'],
+                    'email': data['email'],
                     'password': hashed_pw,
                     'first_name': data['first_name'],
                     'last_name': data['last_name'],
@@ -95,36 +95,6 @@ class UserResource(BaseResource):
                     logging.debug(user_input)
                     raise Exception('User creation failed')
                 user_id = user.id
-
-                client_id = secrets.token_hex(16)
-                client_secret = secrets.token_hex(32)
-                
-                # For now, client name will just be user's full name.
-                client_name = f"{data['first_name']} {data['last_name']}"
-                client_input = {
-                    'client_id': client_id,
-                    'client_name': client_name,
-                    'client_secret': client_secret,
-                    'redirect_uri': 'http://0.0.0.0:5050/auth/callback',
-                    'user_id': user.id
-                }
-                client = OauthClient(**client_input)
-                session.add(client)
-                session.flush()
-                
-                if not client.client_id:
-                    logging.debug(client_input)
-                    raise Exception('Client creation failed')
-                
-                client_scope = OauthClientScope(
-                    client_id=client.client_id,
-                    scope_id=1
-                )
-                session.add(client_scope)
-                session.flush()
-
-                if not client_scope.id:
-                    raise Exception('Client scope creation failed')
         except Exception as e:
             logging.debug(str(e))
             return self.error_response(self.DEFAULT_ERROR_MESSAGE)
