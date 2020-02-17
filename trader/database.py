@@ -29,7 +29,7 @@ class TraderDB(object):
         db = app.config['DATABASE_NAME']
 
         self.engine = create_engine('{}://{}:{}@{}/{}'.format(driver, username, password, host, db))
-        self.Session = scoped_session(sessionmaker(bind=self.engine))
+        self.Session = scoped_session(sessionmaker(bind=self.engine, expire_on_commit=False))
 
         self.redis = Redis(host='redis', db=0, socket_connect_timeout=2, socket_timeout=2)
 

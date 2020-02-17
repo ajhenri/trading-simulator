@@ -1,5 +1,6 @@
 DEFAULT = 'An unexpected error occurred while processing this request'
 INVALID_JSON = 'Unable to parse JSON from the request body'
+INVALID_LOGIN = 'The username/password you specified is invalid'
 ACCOUNT_DNE = 'Account does not exist'
 ACCOUNT_EXISTS = 'Account already exists for this user'
 ACCOUNT_INVALID_ACTION = 'Invalid action for account'

@@ -6,7 +6,7 @@ from marshmallow.fields import Float
 from trader.extensions import ma
 
 class UserVerifySchema(ma.Schema):
-    username = ma.Str(required=True, validate=validate.Length(min=2, max=80))
+    email = ma.Str(required=True, validate=validate.Length(min=3, max=254))
     password = ma.Str(required=True, validate=validate.Length(min=8, max=30), load_only=True)
 
 class UserSchema(UserVerifySchema):

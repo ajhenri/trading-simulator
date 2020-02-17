@@ -1,0 +1,38 @@
+<!doctype html>
+<head>
+    <title>Trader - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', 
+        filename='node_modules/bootstrap/dist/css/bootstrap.min.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+    <div class="text-center">
+        <form class="form-center" method="POST" action="/login/">
+            {{ form.csrf_token }}
+            <h5 class="logo">Trader</h5>
+            <h1 class="h3 mb-3 font-weight-normal">Sign in</h1>
+            <label for="email" class="sr-only">Email</label>
+            <input type="email" name="email" class="form-control" placeholder="Email Address" required autofocus>
+            <label for="password" class="sr-only">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Password" required>
+            <div class="clearfix">
+                <a class="float-left invisible" href="#">Forgot Password</a>
+                <a class="float-right" href="/register">Register</a>
+            </div>
+            <div>
+                <small class="text-danger">{{ error }}</small>
+                {% for field, errors in form.errors.items() %}
+                <small class="text-danger">
+                    {{ ', '.join(errors) }}
+                </small>
+                {% endfor %}
+            </div>
+            <div class="mt-5">
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                <p class="mt-5 mb-3 text-muted">© Copyright {{ now.year }}</p>
+            </div>
+        </form>
+    </div>
+</body>
