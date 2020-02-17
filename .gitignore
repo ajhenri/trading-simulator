@@ -22,3 +22,5 @@ celerybeat.pid
 .DS_Store?
 
 /logs
+
+trader/frontend/node_modules
