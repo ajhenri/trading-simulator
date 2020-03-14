@@ -8,14 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
-    <div>
+    <header>
         <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap navbar-expand-lg">
             <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="/">Trader</a>
             <ul class="navbar-nav ml-auto">
                 {% if current_user.is_authenticated %}
                     <li>
                         <span class="navbar-text text-light">
-                            Logged in as: <strong>{{current_user.email}}</strong>
+                            Logged in as: <strong>{{current_user.first_name}} {{current_user.last_name}}</strong>
                         </span>
                     </li>
                     <li class="nav-item">
@@ -31,7 +31,12 @@
                 {% endif %}
             </ul>
         </nav>
-    </div>
-    {% block content %}{% endblock %}
+    </header>
+    <main class="container-fluid">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="footer bg-light">
+        <small class="text-muted">© Copyright {{ now.year }}</small>
+    </footer>
     <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='dist/bundle.js') }}"></script>
 </body>
