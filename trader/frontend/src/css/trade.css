@@ -1,0 +1,23 @@
+.stock-header {
+    padding: 12px;
+}
+
+.stock-header h5 {
+    margin-bottom: 0px;
+}
+
+.stock-header .stock-symbol,
+.stock-header .stock-price {
+    display: inline-block;
+}
+
+.stock-header .stock-price h3{
+    margin-bottom: 0px;
+}
+
+.stock-badge {
+    position: relative;
+    line-height: 25px;
+    cursor: default;
+    bottom: 1px;
+}

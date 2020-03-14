@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
-    entry: './js/index.js',
+    entry: './src/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js'
@@ -21,21 +21,19 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use: ['css-loader', 'style-loader']
+                use: ['style-loader', 'css-loader']
             }
         ]
     },
-    devServer: {
-        contentBase: path.join(__dirname, "public/"),
-        port: 3000,
-        hotOnly: true
+    resolve: {
+        extensions: ['.js', '.jsx'],
+        modules: [path.resolve(__dirname, 'src'), 'node_modules']
     },
     plugins: [
-        new webpack.ProgressPlugin(),
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.ProgressPlugin()
     ],
     optimization: {
-        minimize: false
+        minimize: true
     },
     mode: "development"
 };
