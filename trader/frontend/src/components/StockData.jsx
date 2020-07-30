@@ -5,6 +5,9 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { getStockInfo } from 'actions';
 
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+
 import StockHistoricalData from './StockHistoricalData';
 import { formatLargeNumber, formatCurrency } from 'utils';
 
@@ -34,21 +37,22 @@ class StockData extends React.Component {
         console.log(stockInfo);
 
         return (
-            <div className="row stock-info">
-                <div className="col-sm">
+            <Row>
+                <Col>
                     <div className="stock-header">
-                        <div className="stock-symbol">
+                        <div className="stock-symbol float-left">
                             <h5>
                                 {stockInfo.data['name']}
                                 <span className="badge badge-info stock-badge ml-2">{stockInfo.data['symbol']}</span>
                             </h5>
                             <small>{stockInfo.data['stock_exchange_long']}</small>
                         </div>
-                        <div className="stock-price">
+                        <div className="stock-price float-right">
                             <h3>
-                                {stockInfo.data['price']}
+                                ${stockInfo.data['price']}
                             </h3>
                         </div>
+                        <div className="clearfix"></div>
                     </div>
                     <table className="table stock-info-grid">
                         <tbody>
@@ -84,11 +88,11 @@ class StockData extends React.Component {
                             </tr>
                         </tbody>
                     </table>
-                </div>
-                <div className="col-sm">
+                </Col>
+                <Col>
                     <StockHistoricalData stockInfo={stockInfo}/>
-                </div>
-            </div>
+                </Col>
+            </Row>
         );
     }
 }

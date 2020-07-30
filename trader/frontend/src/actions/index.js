@@ -1,12 +1,16 @@
 import axios from 'axios';
 import { createDispatchActions } from 'utils';
 
+// #TODO: Configurable Base URL
 export const baseURL = 'http://0.0.0.0:5000/api';
 
 export const CREATE_ACCOUNT = createDispatchActions('CREATE_ACCOUNT');
 export const GET_ACCOUNT_INFO = createDispatchActions('GET_ACCOUNT_INFO');
 export const SEARCH_STOCKS = createDispatchActions('SEARCH_STOCKS');
 export const GET_STOCK_INFO = createDispatchActions('GET_STOCK_INFO');
+export const SET_STOCK_SYMBOL = 'SET_STOCK_SYMBOL';
+
+// #TODO: Reuse below 
 
 export function createAccount(data){
     return dispatch => {
@@ -64,6 +68,15 @@ export function searchStocks(symbol){
                 type: SEARCH_STOCKS.ERROR,
                 data: error.response
             });
+        });
+    };
+}
+
+export function setStockSymbol(symbol){
+    return dispatch => {
+        dispatch({
+            type: SET_STOCK_SYMBOL,
+            data: symbol
         });
     };
 }

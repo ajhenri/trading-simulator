@@ -1,4 +1,5 @@
 .stock-header {
+    font-family: "Georgia", "Times New Roman", "Times", serif;
     padding: 12px;
 }
 
@@ -12,12 +13,27 @@
 }
 
 .stock-header .stock-price h3{
+    font-family: "Courier New", Courier, monospace;
     margin-bottom: 0px;
 }
 
 .stock-badge {
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: 1px;
+    font-size: 14px;
     position: relative;
-    line-height: 25px;
+    line-height: 18px;
     cursor: default;
-    bottom: 1px;
+    bottom: 3px;
+}
+
+.table.stock-info-grid td, .table.stock-info-grid th {
+    padding: 2px 12px;
+    vertical-align: top;
+    border-top: none;
+}
+
+.table.table.stock-info-grid {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 14px;
 }

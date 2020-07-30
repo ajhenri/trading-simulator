@@ -1,36 +1,47 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import Row from 'react-bootstrap/Row';
+
+import { connect } from 'react-redux';
 import StockData from './StockData';
-import StockSearch from './StockSearch';
 
 import 'css/trade.css';
+
+const mapStateToProps = (state) => {
+    return {
+        selectedStockSymbol: state.selectedStockSymbol
+    };
+};
 
 class Trade extends React.Component {
     constructor(props) {
         super(props);
-
-        this.state = {
-            selectedStock: null
-        }
-
-        this.selectStock = this.selectStock.bind(this);
     }
 
-    selectStock(stock){
-        this.setState({ selectedStock: stock.symbol })
+    componentDidMount(){
+        const { selectedStockSymbol } = this.props;
+        if(!selectedStockSymbol){
+            let url = new URL(location.href);
+            let quote = url.searchParams.get('quote');
+            if(quote){
+                this.props.setStockSymbol(quote);
+            }
+        }
     }
 
     render() {
-        const { selectedStock } = this.state;
+        const { selectedStockSymbol } = this.props;
         
         return (
-            <div className="row section-body">
-                <div className="col-sm">
-                    <StockSearch selectStock={this.selectStock} />
-                    {selectedStock && <StockData symbol={selectedStock}/>}
-                </div>
+            <div>
+                {selectedStockSymbol && <StockData symbol={selectedStockSymbol}/>}
             </div>
         );
     }
 }
 
-export default Trade;
+Trade.propTypes = {
+    selectedStockSymbol: PropTypes.string
+};
+
+export default connect(mapStateToProps)(Trade);

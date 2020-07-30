@@ -88,6 +88,9 @@ class AccountCreationForm extends React.Component {
         } else if(initialAmount < 500){
             const error = 'Starting Balance must be at least $500.';
             return this.setState({ fieldErrors: { initialAmount: error } });
+        } else if(initialAmount > 1000000){
+            const error = 'Starting Balance is too high.';
+            return this.setState({ fieldErrors: { initialAmount: error } });
         }
         
         this.props.createAccount({
@@ -104,31 +107,33 @@ class AccountCreationForm extends React.Component {
         }
         
         return (
-            <div className="create-account form-small">
-                <small>Enter an amount below and 
+            <div class="text-center">
+                <div class="mt-5">
+                    <small>Enter an amount below and 
                     click "Create" to start a brokerage simulation account.</small>
-                <form onSubmit={this.handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="initialAmount">
-                            Starting Balance
-                            <span className="text-danger">*</span>
-                        </label>
-                        <MaskedInput
-                            data-field="Starting Balance"
-                            className={inputClass}
-                            name="initialAmount"
-                            value={this.state.initialAmount}
-                            ref="maskedInput"
-                            mask={numberMask}
-                            onChange={this.handleFieldChange}
-                            required
-                        />
-                        <div>
-                            <div className="text-danger error-message">{fieldErrors.initialAmount}</div>
+                    <form class="form-center" onSubmit={this.handleSubmit}>
+                        <div className="form-group">
+                            <label htmlFor="init ialAmount">
+                                Starting Balance
+                                <span className="text-danger">*</span>
+                            </label>
+                            <MaskedInput
+                                data-field="Starting Balance"
+                                className={inputClass}
+                                name="initialAmount"
+                                value={this.state.initialAmount}
+                                ref="maskedInput"
+                                mask={numberMask}
+                                onChange={this.handleFieldChange}
+                                required
+                            />
+                            <div>
+                                <div className="text-danger error-message">{fieldErrors.initialAmount}</div>
+                            </div>
                         </div>
-                    </div>
-                    <input type="submit" className="btn btn-primary" value="Create"/>
-                </form>
+                        <input type="submit" className="btn btn-primary" value="Create"/>
+                    </form>
+                </div>
             </div>
         );
     }

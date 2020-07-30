@@ -48,10 +48,10 @@ class StockHistoricalData extends React.Component {
         console.log(stockInfo);
 
         return (
-            <div className="stock-chart" style={{height: 250}}>
+            <div className="stock-chart" style={{height: 320}}>
                 <ResponsiveLine
                     data={data}
-                    margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+                    margin={{ top: 40, right: 110, bottom: 60, left: 60 }}
                     xScale={{ type: 'point' }}
                     yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: true, reverse: false }}
                     axisTop={null}
@@ -62,7 +62,7 @@ class StockHistoricalData extends React.Component {
                         tickPadding: 5,
                         tickRotation: 0,
                         legend: 'Day',
-                        legendOffset: 36,
+                        legendOffset: 35,
                         legendPosition: 'middle'
                     }}
                     axisLeft={{
@@ -71,7 +71,7 @@ class StockHistoricalData extends React.Component {
                         tickPadding: 5,
                         tickRotation: 0,
                         legend: 'Price',
-                        legendOffset: -40,
+                        legendOffset: -55,
                         legendPosition: 'middle'
                     }}
                     colors={{ scheme: 'red_yellow_green' }}
@@ -82,6 +82,10 @@ class StockHistoricalData extends React.Component {
                     pointLabel="y"
                     pointLabelYOffset={-12}
                     crosshairType="cross"
+                    theme={{
+                        fontFamily: '"Courier New", Courier, monospace',
+                        fontSize: '14px'
+                    }}
                     useMesh={true}
                 />
             </div>
