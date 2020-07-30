@@ -5,9 +5,9 @@ import logging.handlers
 import datetime
 import traceback
 
-from flask import Flask, Blueprint, request, render_template
+from flask import Flask, Blueprint, request, redirect, render_template
 from werkzeug.exceptions import HTTPException
-from flask_login import LoginManager
+from flask_login import LoginManager, login_required
 from flask_wtf.csrf import CSRFProtect
 from flask_restplus import Api, Resource, fields
 
@@ -64,6 +64,10 @@ def create_app():
         return "<b>Count:</b> {}".format(counter)
 
     @app.route('/')
+    @app.route('/account', endpoint='account')
+    @app.route('/trade', endpoint='trade')
+    @app.route('/activity', endpoint='activty')
+    @login_required
     def index():
         return render_template('index.html')
 

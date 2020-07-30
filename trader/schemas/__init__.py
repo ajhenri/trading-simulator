@@ -38,7 +38,6 @@ class AccountReadSchema(ma.Schema):
     last_name = ma.Str()
 
 class AccountCreationSchema(ma.Schema):
-    user_id = ma.Integer(required=True)
     equity_amount = Float(default=float(0.00), validate=validate.Range(min=500))
     initial_amount = Float(required=True, validate=validate.Range(min=500))
 

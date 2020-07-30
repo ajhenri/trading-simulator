@@ -4,6 +4,7 @@ from datetime import datetime
 
 from flask import request
 from marshmallow import ValidationError
+from flask_login import login_required, current_user
 from flask_restplus import Namespace, Resource, fields
 
 from trader.lib import errors
@@ -18,7 +19,8 @@ accounts_ns = Namespace('accounts', description='Account API Functions')
 
 @accounts_ns.doc()
 class AccountResource(BaseResource):
-    def get(self, id):
+    @login_required
+    def get(self):
         """
         Get account information such as cash and equity totals, as well as
         list of currently held stock positions.
@@ -29,7 +31,7 @@ class AccountResource(BaseResource):
             Account identifier.
         """
         with db.session_scope() as session:
-            account = session.query(Account).filter_by(id=id).first()
+            account = session.query(Account).filter_by(user_id=current_user.id).first()
             if not account:
                 return self.error_response(errors.ACCOUNT_DNE, self.HTTP_NOT_FOUND)
 
@@ -56,8 +58,9 @@ class AccountResource(BaseResource):
 
         return self.success_response(data)
 
+    @login_required
     @validate_request_json
-    def patch(self, id, action):
+    def patch(self, action):
         """
         Update the amount of available "cash" in the specified account.
 
@@ -72,7 +75,7 @@ class AccountResource(BaseResource):
             return self.error_response(errors.ACCOUNT_INVALID_ACTION, self.HTTP_BAD_REQUEST)
 
         with db.session_scope() as session:
-            account = session.query(Account).filter_by(id=id).first()
+            account = session.query(Account).filter_by(id=current_user.id).first()
             if not account:
                 return self.error_response(errors.ACCOUNT_DNE, self.HTTP_NOT_FOUND)
 
@@ -89,6 +92,7 @@ class AccountResource(BaseResource):
         
         return self.success_response(result='ok')
     
+    @login_required
     @validate_request_json
     def post(self):
         """
@@ -102,10 +106,12 @@ class AccountResource(BaseResource):
             return self.error_response(err.messages)
         
         with db.session_scope() as session:
-            account = session.query(Account).filter_by(user_id=data['user_id']).first()
+            account = session.query(Account).filter_by(user_id=current_user.id).first()
             if account:
                 return self.error_response(errors.ACCOUNT_EXISTS, self.HTTP_BAD_REQUEST)
             
+            data['user_id'] = current_user.id
+
             account = Account(**data)
             session.add(account)
             session.flush()
@@ -114,7 +120,8 @@ class AccountResource(BaseResource):
 
         return self.success_response(result={'id': created_account_id}, status_code=self.HTTP_CREATED)
 
-    def delete(self, id):
+    @login_required
+    def delete(self):
         """
         Delete the specified brokerage account.
 
@@ -124,7 +131,7 @@ class AccountResource(BaseResource):
             Account identifier.
         """
         with db.session_scope() as session:
-            account = session.query(Account).filter_by(id=id)
+            account = session.query(Account).filter_by(id=current_user.id)
             if not account:
                 return self.error_response(errors.ACCOUNT_DNE, self.HTTP_NOT_FOUND)
             account.delete()
@@ -259,8 +266,7 @@ class StockResource(BaseResource):
                 session.add(trade)
         return self.success_response(result=result, status_code=self.HTTP_CREATED)
 
-accounts_ns.add_resource(AccountResource, '', methods=['POST'])
-accounts_ns.add_resource(AccountResource, '/<int:id>', methods=['GET', 'DELETE'])
-accounts_ns.add_resource(AccountResource, '/<int:id>/<string:action>', methods=['PATCH'])
+accounts_ns.add_resource(AccountResource, '', methods=['POST', 'GET', 'DELETE'])
+accounts_ns.add_resource(AccountResource, '/<string:action>', methods=['PATCH'])
 accounts_ns.add_resource(StockResource, '/<int:id>/stocks', methods=['POST'])
 accounts_ns.add_resource(StockResource, '/<int:id>/stocks/<int:stock_id>', methods=['PUT'])

@@ -23,7 +23,7 @@ def login():
             if password == user.password:
                 login_user(user)
                 if current_user.is_authenticated:
-                    return redirect(url_for('index'))
+                    return redirect(url_for('account'))
             return render_template('login.html', form=form, error=INVALID_LOGIN)
         return redirect(url_for('index'))
     return render_template('login.html', form=form)
@@ -55,7 +55,7 @@ def register():
             login_user(user, force=True)
 
             if current_user.is_authenticated:
-                return redirect(url_for('index'))
+                return redirect(url_for('account'))
         return redirect(url_for('auth.login'))
     return render_template('register.html', form=form)
 

@@ -41,3 +41,20 @@ class WorldTradingData(BaseAPI):
         })
 
         return stock_list if stock_list else []
+
+    def historical_data(self, symbol, date_from, date_to):
+        """
+        Get historical price data for a specified stock symbol.
+
+        Params
+        ------
+        symbol: str
+            
+        """
+        data = self._query_endpoint('history', {
+            'symbol': symbol,
+            'date_to': date_to,
+            'date_from': date_from
+        })
+
+        return data['history']

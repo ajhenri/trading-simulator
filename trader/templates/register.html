@@ -3,43 +3,57 @@
     <title>Trader - Register</title>
     <link rel="stylesheet" href="{{ url_for('static', 
         filename='node_modules/bootstrap/dist/css/bootstrap.min.css') }}"/>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='src/css/style.css') }}"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
-    <div class="text-center">
-        <form class="form-center" method="POST">
-            {{ form.csrf_token }}
-            <h5 class="logo">Trader</h5>
-            <h1 class="h3 mb-3 font-weight-normal">Create Account</h1>
-            <label for="email" class="sr-only">Email Address</label>
-            <input type="text" name="email" class="form-control" placeholder="Email Address" 
-                value="{{ form['email'].data }}" required autofocus/>
-            <label for="first_name" class="sr-only">First Name</label>
-            <input type="text" name="first_name" class="form-control" 
-                placeholder="First Name" value="{{ form['first_name'].data }}" required />
-            <label for="last_name" class="sr-only">Last Name</label>
-            <input type="text" name="last_name" class="form-control" 
-                placeholder="Last Name" value="{{ form['last_name'].data }}" required />
-            <label for="password" class="sr-only">Password</label>
-            <input type="password" name="password" class="form-control" 
-                placeholder="Password" required/>
-            <label for="confirm_password" class="sr-only">Confirm Password</label>
-            <input type="password" name="confirm_password" class="form-control" 
-                placeholder="Confirm Password" required/>
-            <div>
-                <small class="text-danger">{{ error }}</small>
-                {% for field, errors in form.errors.items() %}
-                <small class="text-danger">
-                    {{ ', '.join(errors) }}
-                </small>
-                {% endfor %}
+    <div class="container">
+        <div class="row">
+            <div class="text-center full-width">
+                <form class="form-center" method="POST">
+                    {{ form.csrf_token }}
+                    <h5 class="logo">Trader</h5>
+                    <h1 class="h3 mb-3 font-weight-normal">Create Account</h1>
+                    <div class="form-group">
+                        <label for="email" class="sr-only">Email Address</label>
+                        <input type="text" name="email" class="form-control" placeholder="Email Address" 
+                            value="{{ form['email'].data }}" required autofocus/>
+                    </div>
+                    <div class="form-group">
+                        <label for="first_name" class="sr-only">First Name</label>
+                        <input type="text" name="first_name" class="form-control" 
+                            placeholder="First Name" value="{{ form['first_name'].data }}" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name" class="sr-only">Last Name</label>
+                        <input type="text" name="last_name" class="form-control" 
+                            placeholder="Last Name" value="{{ form['last_name'].data }}" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="sr-only">Password</label>
+                        <input type="password" name="password" class="form-control" 
+                            placeholder="Password" required/>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password" class="sr-only">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control" 
+                            placeholder="Confirm Password" required/>
+                    </div>
+                    <div>
+                        <small class="text-danger">{{ error }}</small>
+                        {% for field, errors in form.errors.items() %}
+                        <small class="text-danger">
+                            {{ ', '.join(errors) }}
+                        </small>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-5">
+                        <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+                        <p class="mt-5 mb-3 text-muted">© Copyright {{ now.year }}</p>
+                    </div>
+                </form>
             </div>
-            <div class="mt-5">
-                <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
-                <p class="mt-5 mb-3 text-muted">© Copyright {{ now.year }}</p>
-            </div>
-        </form>
+        </div>
     </div>
 </body>
