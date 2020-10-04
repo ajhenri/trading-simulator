@@ -2,18 +2,20 @@ import bcrypt
 import secrets
 import logging
 
-from flask import request
+from http import HTTPStatus
+from flask import request, Blueprint
 from marshmallow import ValidationError
-from flask_restplus import Namespace, Resource, fields
+from flask_restful import Api, Resource
 
 from trader.extensions import db
+from trader.lib.definitions import ResponseErrors
 from trader.resources.base_resource import BaseResource, validate_request_json
 from trader.models import User
 from trader.schemas import UserVerifySchema, UserSchema, ClientSchema
 
-users_ns = Namespace('users', description='User API Functions')
+users_bp = Blueprint('users', __name__)
+users = Api(users_bp)
 
-@users_ns.doc()
 class UserVerifyResource(BaseResource):
     @validate_request_json
     def post(self):
@@ -25,7 +27,7 @@ class UserVerifyResource(BaseResource):
         try:
             data = schema.loads(request.get_data())
         except ValidationError as err:
-            return self.error_response(err.messages, self.HTTP_BAD_REQUEST)
+            return self.error_response(err.messages, HTTPStatus.BAD_REQUEST)
 
         with db.session_scope() as session:
             user = session.query(User).filter_by(email=data['email']).first()
@@ -35,8 +37,6 @@ class UserVerifyResource(BaseResource):
             password = bcrypt.hashpw(data['password'].encode(), user.salt)
             verify = password == user.password
             return self.success_response(result=verify)
-
-@users_ns.doc()
 class UserResource(BaseResource):
     def get(self, id):
         """
@@ -51,7 +51,7 @@ class UserResource(BaseResource):
         with db.session_scope() as session:
             user = session.query(User).filter_by(id=id).first()
             if not user:
-                return self.error_response('User does not exist', 404)
+                return self.error_response(ResponseErrors.USER_DNE, HTTPStatus.NOT_FOUND)
 
             schema = UserSchema()
             data = schema.dump(user)
@@ -68,7 +68,7 @@ class UserResource(BaseResource):
         try:
             data = schema.loads(request.get_data())
         except ValidationError as err:
-            return self.error_response(err.messages, self.HTTP_BAD_REQUEST)
+            return self.error_response(err.messages, HTTPStatus.BAD_REQUEST)
         
         user_id = client_id = None
         try:
@@ -97,11 +97,11 @@ class UserResource(BaseResource):
                 user_id = user.id
         except Exception as e:
             logging.debug(str(e))
-            return self.error_response(self.DEFAULT_ERROR_MESSAGE)
+            return self.error_response(ResponseErrors.DEFAULT)
 
         return self.success_response(result={'user_id': user_id, 'client_id': client_id}, \
-            success=True, status_code=201)
+            success=True, status_code=HTTPStatus.CREATED)
 
-users_ns.add_resource(UserResource, '', methods=['POST'])
-users_ns.add_resource(UserResource, '/<int:id>', methods=['GET', 'PATCH'])
-users_ns.add_resource(UserVerifyResource, '/verify', methods=['POST'])
+users.add_resource(UserResource, '', methods=['POST'])
+users.add_resource(UserResource, '/<int:id>', methods=['GET', 'PATCH'], endpoint='users_by_id')
+users.add_resource(UserVerifyResource, '/verify', methods=['POST'])

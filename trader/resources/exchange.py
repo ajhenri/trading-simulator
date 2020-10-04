@@ -1,13 +1,14 @@
-from flask import request
-from flask_restplus import Namespace, Resource, fields
+import json
+import math
 
+from datetime import datetime, timedelta
+from flask import request, Blueprint
+from flask_restful import Api, Resource
 from trader.resources.base_resource import BaseResource
-from trader.services.third_party.wtd import WorldTradingData
 
-exchange_ns = Namespace('exchange', description='Exchange API Functions')
+exchange_bp = Blueprint('exchange', __name__)
+exchange = Api(exchange_bp)
 
-@exchange_ns.doc()
-@exchange_ns.route('/')
 class ExchangeResource(BaseResource):
     def get(self):
         """
@@ -16,12 +17,9 @@ class ExchangeResource(BaseResource):
         stock_list = request.args.getlist("stock")
         results = []
         if len(stock_list) > 0:
-            stocks = WorldTradingData().get_stocks(stock_list)
-            results = stocks['data']
-        return self.success_response(results)
+            response = self.iex_api.get_stock_data(stock_list)
+        return self.success_response(response)
 
-@exchange_ns.doc()
-@exchange_ns.route('/search/<symbol>')
 class ExchangeSearchResource(BaseResource):
     def get(self, symbol):
         """
@@ -30,8 +28,9 @@ class ExchangeSearchResource(BaseResource):
         Params
         ------
         symbol : str
-            The stock symbol (e.g. TSLA, APPL)
         """
-        api = WorldTradingData()
-        data = api.search(symbol)
-        return self.success_response(data['data'])
+        response = self.iex_api.search_symbol(symbol)
+        return self.success_response(response)
+
+exchange.add_resource(ExchangeResource, '', methods=['GET'])
+exchange.add_resource(ExchangeSearchResource, '/search/<string:symbol>', methods=['GET'])

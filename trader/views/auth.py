@@ -5,26 +5,35 @@ from flask_login import current_user, login_user, logout_user
 
 from trader.models import User
 from trader.extensions import db
-from trader.lib.errors import INVALID_LOGIN
+from trader.lib.definitions import ResponseErrors
 from trader.schemas.forms import LoginForm, RegisterForm
 
 auth_bp = Blueprint('auth', __name__)
+
+def authenticate_user(email, password):
+    with db.session_scope() as session:
+        user = session.query(User).filter_by(email=email).first()
+        if not user:
+            return False
+
+        password = bcrypt.hashpw(password.encode(), user.salt)
+        if password == user.password:
+            login_user(user)
+            return user
+        return False
 
 @auth_bp.route('/login/', methods=['GET', 'POST'])
 def login():
     form = LoginForm(request.form)
     if form.validate_on_submit():
         with db.session_scope() as session:
-            user = session.query(User).filter_by(email=form.email.data).first()
+            user = authenticate_user(email, form.password.data)
             if not user:
-                return render_template('login.html', form=form, error=INVALID_LOGIN)
-
-            password = bcrypt.hashpw(form.password.data.encode(), user.salt)
-            if password == user.password:
-                login_user(user)
-                if current_user.is_authenticated:
-                    return redirect(url_for('account'))
-            return render_template('login.html', form=form, error=INVALID_LOGIN)
+                return render_template('login.html', form=form, error=ResponseErrors.INVALID_LOGIN)
+            
+            if current_user.is_authenticated:
+                return redirect(url_for('account'))
+            return render_template('login.html', form=form, error=ResponseErrors.INVALID_LOGIN)
         return redirect(url_for('index'))
     return render_template('login.html', form=form)
 
