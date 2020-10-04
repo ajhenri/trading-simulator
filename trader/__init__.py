@@ -1,5 +1,6 @@
 import os
 import sys
+import base64
 import logging
 import logging.handlers
 import datetime
@@ -9,13 +10,12 @@ from flask import Flask, Blueprint, request, redirect, render_template
 from werkzeug.exceptions import HTTPException
 from flask_login import LoginManager, login_required
 from flask_wtf.csrf import CSRFProtect
-from flask_restplus import Api, Resource, fields
 
-from trader.lib import errors
 from trader.models import User
 from trader.extensions import ma, db
-from trader.views.auth import auth_bp
-from trader.resources import API_NAMESPACES
+from trader.views.auth import auth_bp, authenticate_user
+from trader.resources import api_blueprints
+from trader.lib.definitions import ResponseErrors
 
 # Simple logging setup
 file_handler = logging.handlers.RotatingFileHandler('./logs/trading-simulator.log', maxBytes=10000)
@@ -37,26 +37,32 @@ def create_app():
 
     csrf = CSRFProtect(app)
 
-    api_bp = Blueprint('api', __name__, url_prefix='/api')
-    api = Api(api_bp, version='1.0', title='Trading Simulator API',
-        description='A simple API developed for the stock trading simulation application of the same name.',
-    )
-    csrf.exempt(api_bp)
-
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
 
     ma.init_app(app)
 
-    for ns in API_NAMESPACES:
-        api.add_namespace(*ns)
-
     @login_manager.user_loader
     def load_user(user_id):
         with db.session_scope() as session:
             return session.query(User).filter_by(id=user_id).first()
         return False
+
+    @login_manager.request_loader
+    def load_user_from_request(request):
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_header = auth_header.replace('Basic ', '', 1)
+        try:
+            credentials = base64.b64decode(auth_header).decode()
+            credentials = credentials.split(':')
+            
+            user = authenticate_user(credentials[0], credentials[1])
+        except TypeError as e:
+            logging.error({'exception': str(e)})
+        
+        return user
 
     @app.route("/test")
     def test():
@@ -94,8 +100,11 @@ def create_app():
     #             return render_template('errors/404.html')
     #         else:
     #             return render_template('errors/500.html')
-
-    app.register_blueprint(api_bp)
-    app.register_blueprint(auth_bp)
+    
+    with app.app_context():
+        for bp in api_blueprints:
+            csrf.exempt(bp[0])
+            app.register_blueprint(bp[0], url_prefix='/api{}'.format(bp[1]))
+        app.register_blueprint(auth_bp)
 
     return app

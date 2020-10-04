@@ -2,7 +2,8 @@ from decimal import Decimal
 from datetime import datetime
 
 from flask_login import UserMixin
-from sqlalchemy import Column, ForeignKey, Enum, Integer, String, Binary, DateTime, Numeric
+from sqlalchemy import Column, ForeignKey, Enum, Integer, String, Binary, DateTime, Numeric, \
+    UniqueConstraint
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
@@ -37,7 +38,11 @@ class Account(Base):
 
 class Stock(Base):
     __tablename__ = 'stocks'
+    __table_args__ = (
+        UniqueConstraint('account_id', 'symbol', name='stocks_akey'),
+    )
     id = Column(Integer, primary_key=True)
+    symbol = Column(String(5), nullable=False)
     account_id = Column(Integer, ForeignKey('accounts.id', onupdate='CASCADE', ondelete='CASCADE'))
     bought_at = Column(
         Numeric(precision=19, scale=2, asdecimal=False, decimal_return_scale=None), 
@@ -48,7 +53,6 @@ class Stock(Base):
         Numeric(precision=19, scale=2, asdecimal=False, decimal_return_scale=None), 
         nullable=False)
     shares = Column(Integer, nullable=False)
-    symbol = Column(String(5), unique=True, nullable=False)
 
 class Trade(Base):
     __tablename__ = 'trades'

@@ -1,9 +1,9 @@
-from .users import users_ns
-from .accounts import accounts_ns
-from .exchange import exchange_ns
+from .users import users_bp
+from .accounts import accounts_bp
+from .exchange import exchange_bp
 
-API_NAMESPACES = [
-    (users_ns, '/users'),
-    (accounts_ns, '/accounts'),
-    (exchange_ns, '/exchange')
+api_blueprints = [
+    (users_bp, '/users'),
+    (accounts_bp, '/accounts'),
+    (exchange_bp, '/exchange')
 ]
