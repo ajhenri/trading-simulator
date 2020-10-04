@@ -7,6 +7,8 @@ import { getStockInfo } from 'actions';
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 
 import StockHistoricalData from './StockHistoricalData';
 import { formatLargeNumber, formatCurrency } from 'utils';
@@ -24,17 +26,16 @@ class StockData extends React.Component {
         super(props);
     }
 
-    componentDidMount(){
-        this.props.getStockInfo(this.props.symbol, 5);
-    }
-
     render(){
-        const { stockInfo } = this.props;
-        if(!stockInfo){
-            return <div/>
-        }
+        const { stockInfo, accountInfo } = this.props;
+        if(!stockInfo) return (<div/>);
 
-        console.log(stockInfo);
+        let hasPosition = false;
+        for(const [pos, val] of Object.entries(accountInfo.stocks)){
+            if(pos == stockInfo.data['symbol']){
+                hasPosition = true;
+            }
+        }
 
         return (
             <Row>
@@ -88,6 +89,17 @@ class StockData extends React.Component {
                             </tr>
                         </tbody>
                     </table>
+                    <div className="ml-2 mt-2">
+                        <Button className="mr-1" size="sm" onClick={() => this.props.showModal('buy', true)}>
+                            Buy
+                        </Button>
+                        <Button className="mr-1" size="sm" onClick={() => this.props.showModal('sell', true)} disabled={!hasPosition}>
+                            Sell
+                        </Button>
+                        <Button className="mr-1" size="sm" onClick={() => this.props.showModal('sell', true)} disabled={!hasPosition}>
+                            Sell All
+                        </Button>
+                    </div>
                 </Col>
                 <Col>
                     <StockHistoricalData stockInfo={stockInfo}/>

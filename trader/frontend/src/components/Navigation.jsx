@@ -28,7 +28,7 @@ class Navigation extends React.Component {
             <Navbar collapseOnSelect bg="light" expand="lg" fixed="top" className="navbar-custom">
                 <Navbar.Brand href="/account">Trader</Navbar.Brand>
                 <Navbar.Toggle aria-controls="trader-navbar" />
-                <Navbar.Collapse id="trader-navbar">
+                <Navbar.Collapse id="trader-navbar" className="justify-content-end">
                     <Nav className="mr-auto">
                         <Form inline>
                             <StockSearch selectStock={this.selectStock} />

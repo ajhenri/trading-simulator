@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { ResponsiveLine } from '@nivo/line';
+import Tabs from 'react-bootstrap/Tabs';
+
 import { getStockInfo } from 'actions';
 import { formatLargeNumber, formatCurrency } from 'utils';
 
@@ -84,7 +86,7 @@ class StockHistoricalData extends React.Component {
                     crosshairType="cross"
                     theme={{
                         fontFamily: '"Courier New", Courier, monospace',
-                        fontSize: '14px'
+                        fontSize: 14
                     }}
                     useMesh={true}
                 />

@@ -3,3 +3,28 @@
     line-height: 100px;
     font-size: 48px;
 }
+
+.account-total {
+    text-align: center;
+}
+
+.account-total h3 {
+    font-size: 72px;
+    font-weight: 200;
+    color: darkslategray;
+}
+
+.account-total small {
+    position: relative;
+    font-size: 20px;
+    font-weight: bold;
+    color: green;
+    bottom: 15px;
+}
+
+.account-total small svg {
+    position: relative;
+    bottom: 2px;
+    fill: green;
+    stroke: green;
+}

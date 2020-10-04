@@ -3,6 +3,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { formatCurrency } from 'utils';
 import { getAccountInfo } from 'actions';
+import { ArrowUp } from 'react-bootstrap-icons';
 
 import 'css/account.css';
 import AccountCreationForm from './AccountCreationForm';
@@ -26,6 +27,9 @@ class Account extends React.Component {
 
     render() {
         const { accountInfo, accountInfoError } = this.props;
+        console.log(accountInfo);
+
+        //{formatCurrency(accountInfo.equity_amount)}
 
         return (
             <div className="full-width">
@@ -34,12 +38,16 @@ class Account extends React.Component {
                 }
                 {accountInfo &&
                     <div className="account-info">
-                        <h5>Account</h5>
-                        <label>Cash: {formatCurrency(accountInfo.cash_amount)}</label>
-                        <br/>
-                        <label>Equity: {formatCurrency(accountInfo.equity_amount)}</label>
-                        <hr></hr>
-                        <h5>Stock Portfolio</h5>
+                        <div className="account-total">
+                            <h3>
+                                {formatCurrency(accountInfo.cash_amount)}
+                            </h3>
+                            <small className="account-pct-change">
+                                <ArrowUp color="royalblue" size={24}/>43.9%
+                            </small>
+                        </div>
+                        
+                        <h5>Positions</h5>
                         <p className="text-muted">No positions currently held.</p>
                     </div>
                 }

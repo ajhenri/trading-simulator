@@ -9,8 +9,7 @@ export const GET_ACCOUNT_INFO = createDispatchActions('GET_ACCOUNT_INFO');
 export const SEARCH_STOCKS = createDispatchActions('SEARCH_STOCKS');
 export const GET_STOCK_INFO = createDispatchActions('GET_STOCK_INFO');
 export const SET_STOCK_SYMBOL = 'SET_STOCK_SYMBOL';
-
-// #TODO: Reuse below 
+export const BUY_STOCK = createDispatchActions('BUY_STOCK');
 
 export function createAccount(data){
     return dispatch => {
@@ -95,6 +94,30 @@ export function getStockInfo(symbol, days){
         }).catch((error) => {
             dispatch({
                 type: GET_STOCK_INFO.ERROR,
+                data: error.response
+            });
+        });
+    };
+}
+
+export function buyStock(account_id, symbol, shares, price){
+    return dispatch => {
+        dispatch({
+            type: BUY_STOCK.REQUEST
+        });
+
+        axios.post(`${baseURL}/accounts/${account_id}/stocks`, {
+            'symbol': symbol,
+            'shares': shares,
+            'price': price
+        }).then((response) => {
+            dispatch({
+                type: BUY_STOCK.SUCCESS,
+                data: response.data
+            });
+        }).catch((error) => {
+            dispatch({
+                type: BUY_STOCK.ERROR,
                 data: error.response
             });
         });

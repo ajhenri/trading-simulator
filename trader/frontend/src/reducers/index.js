@@ -3,12 +3,15 @@ import {
     GET_ACCOUNT_INFO,
     SEARCH_STOCKS,
     GET_STOCK_INFO,
-    SET_STOCK_SYMBOL
+    SET_STOCK_SYMBOL,
+    BUY_STOCK
 } from 'actions';
 
 const INITIAL_STATE = {};
 
 const rootReducer = (state = INITIAL_STATE, action) => {
+    console.log(state);
+    console.log(action);
     switch(action.type){
         case CREATE_ACCOUNT.REQUEST:
             return {
@@ -82,6 +85,23 @@ const rootReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 selectedStockSymbol: action.data
+            };
+        case BUY_STOCK.REQUEST:
+            return {
+                ...state,
+                isTradingStock: true
+            };
+        case BUY_STOCK.SUCCESS:
+            return {
+                ...state,
+                isTradingStock: false,
+                buyStockResult: action.data
+            };
+        case BUY_STOCK.ERROR:
+            return {
+                ...state,
+                isTradingStock: false,
+                buyStockError: action.data
             };
         default:
             return state;
