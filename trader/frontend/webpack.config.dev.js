@@ -39,7 +39,7 @@ module.exports = {
         new webpack.ProgressPlugin()
     ],
     optimization: {
-        minimize: false
+        minimize: true
     },
     devServer: {
         contentBase: path.join(__dirname, 'dist'),

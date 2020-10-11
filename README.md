@@ -1,12 +1,15 @@
 # Trading Simulator (Work in Progress)
 
-This is a small stock trading simulator built with Python using the Flask framework and React.JS on the front-end.
-The documentation here is also still in progress.
+This is a small stock trading simulator built with Python using the Flask framework with ReactJS on the front-end.
+The project is currently a work in progress.
 
-## Requirements
+## Building the Application
+
+### Requirements
 * Docker
+* IEX API KEY
 
-## Configuring API Keys and DB Environment
+### Configuring API Keys and DB Environment
 
 Docker gets the database configuration from an environment file `database.env` located in the root folder of the project.
 It is not under source control.
@@ -22,6 +25,7 @@ In the root of the project, an `instance` folder has to be created as well, whic
 as a module to get configuration values.
 
 `instance/__init__.py` (Empty File)  
+
 `instance/config.py`  
 ```
 SECRET_KEY = 'key'
