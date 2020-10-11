@@ -9,10 +9,10 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 
-from instance import config as icfg
+from instance import config as Config
 
-sqlalchemy_url = '{}://{}:{}@{}/{}'.format(icfg.DATABASE_DRIVER, icfg.DATABASE_USER, \
-    icfg.DATABASE_PASS, icfg.DATABASE_HOST, icfg.DATABASE_NAME)
+sqlalchemy_url = '{}://{}:{}@{}/{}'.format(Config.DATABASE_DRIVER, Config.DATABASE_USER, \
+    Config.DATABASE_PASS, Config.DATABASE_HOST, Config.DATABASE_NAME)
 
 config = context.config
 config.set_main_option('sqlalchemy.url', sqlalchemy_url)

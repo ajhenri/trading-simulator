@@ -1,28 +1,26 @@
 import logging
 
+from http import HTTPStatus
 from functools import wraps
 from flask import request, jsonify
-from flask_restplus import Resource
+from flask_restful import Resource
 
-from trader.lib import errors
+from trader.lib.definitions import ResponseErrors
+from trader.services.third_party.iex import IEXApi
 
 class BaseResource(Resource):
-    HTTP_OK = 200
-    HTTP_CREATED = 201
-    HTTP_BAD_REQUEST = 400
-    HTTP_NOT_FOUND = 404
-    HTTP_METHOD_NOT_ALLOWED = 405
-    HTTP_INTERNAL_SERVER_ERROR = 500
+    def __init__(self):
+        self.iex_api = IEXApi()
 
     def http_response(self, response, status_code):
         return response, status_code
 
-    def error_response(self, error, status_code=HTTP_INTERNAL_SERVER_ERROR):
+    def error_response(self, error, status_code):
         response = {}
         response['error'] = error
         return self.http_response(response, status_code)
 
-    def success_response(self, result={}, success=True, status_code=HTTP_OK):
+    def success_response(self, result={}, success=True, status_code=HTTPStatus.OK):
         response = {}
         response['result'] = result
         response['success'] = success
@@ -35,7 +33,7 @@ def validate_request_json(f):
         try:
             json_data = request.get_json()
         except Exception as e:
-            response = {'error': errors.INVALID_JSON}
-            return response, BaseResource.HTTP_BAD_REQUEST
+            response = {'error': ResponseErrors.INVALID_JSON}
+            return response, HTTPStatus.BAD_REQUEST
         return f(*args, **kwargs)
     return decorated
