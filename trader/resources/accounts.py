@@ -48,12 +48,15 @@ class AccountResource(BaseResource):
             stock_list = stocks.keys()
             if len(stock_list) > 0:
                 stock_data = self.iex_api.get_stock_data(stock_list)
-                for symb, stock in stock_data.items():
-                    if symb in stocks:
-                        shares = stocks[symb]['shares']
-                        price = float(stock['quote']['latestPrice'])
-                        stocks[symb]['price'] = "{0:.2f}".format(price)
-                        stocks[symb]['value'] = "{0:.2f}".format(price*shares)
+                if stock_data:
+                    for symb, stock in stock_data.items():
+                        if symb in stocks:
+                            shares = stocks[symb]['shares']
+                            price = float(stock['quote']['latestPrice'])
+                            stocks[symb]['price'] = "{0:.2f}".format(price)
+                            stocks[symb]['value'] = "{0:.2f}".format(price*shares)
+                else:
+                    return self.error_response(ResponseErrors.DEFAULT)
 
             schema = AccountReadSchema()
             data = schema.dump(account)

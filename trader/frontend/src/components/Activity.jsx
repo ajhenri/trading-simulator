@@ -11,6 +11,9 @@ class Activity extends React.Component {
                 <div className="col-sm">
                     <h5>Activity History</h5>
                 </div>
+                <div>
+                    <p>Todo...</p>
+                </div>
             </div>
         );
     }

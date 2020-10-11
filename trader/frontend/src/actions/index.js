@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createDispatchActions } from 'utils';
 
-// #TODO: Configurable Base URL
+// #TODO: Configurable Base URL based on dev, qa, prod...
 export const baseURL = 'http://0.0.0.0:5000/api';
 
 export const CREATE_ACCOUNT = createDispatchActions('CREATE_ACCOUNT');
@@ -11,6 +11,9 @@ export const GET_STOCK_INFO = createDispatchActions('GET_STOCK_INFO');
 export const SET_STOCK_SYMBOL = 'SET_STOCK_SYMBOL';
 export const TRADE_STOCK = createDispatchActions('TRADE_STOCK');
 
+
+// #TODO : Make the process of the below functions reusable.
+// #TODO : Implement async/await for below functions.
 export function createAccount(data){
     return dispatch => {
         dispatch({
@@ -129,15 +132,7 @@ export function tradeExistingStock(account_id, stock_id, data){
         dispatch({
             type: TRADE_STOCK.REQUEST
         });
-
-        // data = {
-        //     'symbol': symbol,
-        //     'shares': shares,
-        //     'price': price,
-        //     'trade_type': trade_type
-        // }
-
-        axios.post(`${baseURL}/accounts/${account_id}/stocks/${stock_id}`, data).then((response) => {
+        axios.put(`${baseURL}/accounts/${account_id}/stocks/${stock_id}`, data).then((response) => {
             dispatch({
                 type: TRADE_STOCK.SUCCESS,
                 data: response.data

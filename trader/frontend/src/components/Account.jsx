@@ -31,7 +31,6 @@ class Account extends React.Component {
 
     render() {
         const { accountInfo, accountInfoError } = this.props;
-        console.log(accountInfo);
 
         const stocks = accountInfo != null ? accountInfo.stocks : {};
         const stocksKeys = Object.keys(stocks);

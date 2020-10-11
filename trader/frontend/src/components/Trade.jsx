@@ -32,13 +32,15 @@ class Trade extends React.Component {
                     show: false
                 },
                 sell: {
-                    show: false
+                    show: false,
+                    sellAll: false
                 }
             },
             numberOfShares: 1
         }
 
         this.buyStock = this.buyStock.bind(this);
+        this.sellStock = this.sellStock.bind(this);
         this.showModal = this.showModal.bind(this);
         this.handleFieldChange = this.handleFieldChange.bind(this);
     }
@@ -49,7 +51,6 @@ class Trade extends React.Component {
             let url = new URL(location.href);
             let quote = url.searchParams.get('quote');
             if(quote){
-                console.log(quote);
                 this.props.setStockSymbol(quote);
                 this.props.getStockInfo(quote);
             }
@@ -58,53 +59,76 @@ class Trade extends React.Component {
     }
 
     showModal(modalName, show){
-        console.log(this.state);
         let modals = this.state.modals;
+
+        let numberOfShares = 1;
+        let sellAll = false;
+        if(modalName == 'sellAll'){
+            sellAll = true;
+            modalName = 'sell';
+
+            const { selectedStockSymbol, accountInfo } = this.props;
+            numberOfShares = accountInfo.stocks[selectedStockSymbol].shares;
+        }
         if (modals[modalName]){
             modals[modalName].show = show;
+            if(modalName == 'sell'){
+                modals[modalName].sellAll = sellAll;
+            }
             this.setState({
-                modals: modals
+                modals: modals,
+                numberOfShares: numberOfShares
             });
         }
-        console.log(this.state);
     }
 
     handleFieldChange(event){
         let state = this.state;
-
         if(event.target && event.target.name){
-            if(event.target.name == 'Buy'){
-
-            }
-    
             state[event.target.name] = event.target.value;
             this.setState(state);
         }
     }
 
     buyStock(){
-        const { stockInfo, accountInfo } = this.props;
-        this.props.buyNewStock(accountInfo.id, stockInfo.data.symbol, this.state.numberOfShares, stockInfo.data.price);
+        const { stockInfo, selectedStockSymbol, accountInfo } = this.props;
+        const hasStock = accountInfo.stocks && accountInfo.stocks[selectedStockSymbol];
+        const stockQuote = stockInfo[selectedStockSymbol]['quote'];
+        if(!hasStock){
+            this.props.buyNewStock(accountInfo.id, selectedStockSymbol, this.state.numberOfShares, stockQuote.latestPrice);
+        } else {
+            const stock = accountInfo.stocks[selectedStockSymbol];
+            this.props.tradeExistingStock(accountInfo.id, stock.id, {
+                'symbol': selectedStockSymbol,
+                'shares': this.state.numberOfShares,
+                'price': stockQuote.latestPrice,
+                'trade_type': 'buy'
+            })
+        }
+    }
+
+    sellStock(){
+        const { stockInfo, selectedStockSymbol, accountInfo } = this.props;
+        const stock = accountInfo.stocks[selectedStockSymbol];
+        const stockQuote = stockInfo[selectedStockSymbol]['quote'];
+        this.props.tradeExistingStock(accountInfo.id, stock.id, {
+            'symbol': selectedStockSymbol,
+            'shares': this.state.numberOfShares,
+            'price': stockQuote.latestPrice,
+            'trade_type': 'sell'
+        });
     }
 
     render() {
         const { modals } = this.state;
         const { selectedStockSymbol, stockInfo, accountInfo } = this.props;
 
-        console.log('render');
-        console.log(modals);
-
-        console.log(selectedStockSymbol);
-        console.log(stockInfo);
-        console.log(accountInfo);
-
         if(!accountInfo || !stockInfo || !stockInfo[selectedStockSymbol]) return (<div/>);
         const s = stockInfo[selectedStockSymbol];
-        const maximumShares = Math.floor(parseFloat(accountInfo.cash_amount)/parseFloat(s['quote']['price']));
-        
-        console.log('trade..');
-        console.log(s);
-        console.log(s['quote']['price']);
+        const maximumShares = Math.floor(parseFloat(accountInfo.cash_amount)/parseFloat(s['quote']['latestPrice']));
+        const sharesOwned = accountInfo.stocks && accountInfo.stocks[selectedStockSymbol] ? 
+            accountInfo.stocks[selectedStockSymbol].shares : 0;
+
         return (
             <div>
                 {   selectedStockSymbol && 
@@ -138,6 +162,7 @@ class Trade extends React.Component {
                     title={"Sell Position"}
                     show={modals.sell.show}
                     submitText={'Sell'}
+                    onSubmit={this.sellStock}
                     hideModal={() => this.showModal('sell', false)}
                 >
                     <Form>
@@ -145,10 +170,11 @@ class Trade extends React.Component {
                         <Form.Group>
                             <Form.Control 
                                 type="number" name="numberOfShares" 
-                                placeholder="Shares" min={1} max={100} 
+                                placeholder="Shares" min={1} max={sharesOwned} 
                                 value={this.state.numberOfShares}
                                 onChange={this.handleFieldChange}
                             />
+                            {sharesOwned > 0 && <p>Shares Owned: {sharesOwned}</p>}
                         </Form.Group>
                     </Form>
                     <small></small>

@@ -10,8 +10,6 @@ import {
 const INITIAL_STATE = {};
 
 const rootReducer = (state = INITIAL_STATE, action) => {
-    console.log(state);
-    console.log(action);
     switch(action.type){
         case CREATE_ACCOUNT.REQUEST:
             return {

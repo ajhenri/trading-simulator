@@ -97,7 +97,7 @@ class StockData extends React.Component {
                         <Button className="mr-1" size="sm" onClick={() => this.props.showModal('sell', true)} disabled={!hasPosition}>
                             Sell
                         </Button>
-                        <Button className="mr-1" size="sm" onClick={() => this.props.showModal('sell', true)} disabled={!hasPosition}>
+                        <Button className="mr-1" size="sm" onClick={() => this.props.showModal('sellAll', true)} disabled={!hasPosition}>
                             Sell All
                         </Button>
                     </div>
