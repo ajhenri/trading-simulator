@@ -8,7 +8,6 @@ import { getStockInfo } from 'actions';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
 
 import StockHistoricalData from './StockHistoricalData';
 import { formatLargeNumber, formatCurrency } from 'utils';
@@ -29,13 +28,17 @@ class StockData extends React.Component {
     render(){
         const { stockInfo, accountInfo } = this.props;
         if(!stockInfo) return (<div/>);
+        if(!stockInfo[this.props.symbol]) return (<div/>);
 
         let hasPosition = false;
-        for(const [pos, val] of Object.entries(accountInfo.stocks)){
-            if(pos == stockInfo.data['symbol']){
+        for(const [pos, _] of Object.entries(accountInfo.stocks)){
+            if(pos == stockInfo[this.props.symbol]['quote']['symbol']){
                 hasPosition = true;
             }
         }
+
+        const quote = stockInfo[this.props.symbol]['quote'];
+        const chart = stockInfo[this.props.symbol]['chart'];
 
         return (
             <Row>
@@ -43,14 +46,14 @@ class StockData extends React.Component {
                     <div className="stock-header">
                         <div className="stock-symbol float-left">
                             <h5>
-                                {stockInfo.data['name']}
-                                <span className="badge badge-info stock-badge ml-2">{stockInfo.data['symbol']}</span>
+                                {quote.companyName}
+                                <span className="badge badge-info stock-badge ml-2">{quote.symbol}</span>
                             </h5>
-                            <small>{stockInfo.data['stock_exchange_long']}</small>
+                            <small>{quote.primaryExchange}</small>
                         </div>
                         <div className="stock-price float-right">
                             <h3>
-                                ${stockInfo.data['price']}
+                                ${quote.latestPrice}
                             </h3>
                         </div>
                         <div className="clearfix"></div>
@@ -59,33 +62,31 @@ class StockData extends React.Component {
                         <tbody>
                             <tr>
                                 <th className="stock-info-label" scope="row">Previous Close</th>
-                                <td>{formatCurrency(stockInfo.data['close_yesterday'])}</td>
+                                <td>{formatCurrency(quote.previousClose)}</td>
                                 <th className="stock-info-label" scope="row">Open</th>
-                                <td>{formatCurrency(stockInfo.data['price_open'])}</td>
+                                <td>{formatCurrency(quote.open)}</td>
                             </tr>
                             <tr>
                                 <th className="stock-info-label" scope="row">Day's Range</th>
-                                <td>{formatCurrency(stockInfo.data['day_low'])} - {formatCurrency(stockInfo.data['day_high'])}</td>
+                                <td>{formatCurrency(quote.low)} - {formatCurrency(quote.high)}</td>
                                 <th className="stock-info-label" scope="row">52 Week Range</th>
-                                <td>{formatCurrency(stockInfo.data['52_week_low'])} - {formatCurrency(stockInfo.data['52_week_high'])}</td>
+                                <td>{formatCurrency(quote.week52Low)} - {formatCurrency(quote.week52High)}</td>
                             </tr>
                             <tr>
                                 <th className="stock-info-label" scope="row">Volume</th>
-                                <td>{formatLargeNumber(stockInfo.data['volume'])}</td>
+                                <td>{formatLargeNumber(quote.volume)}</td>
                                 <th className="stock-info-label" scope="row">Avg. Volume</th>
-                                <td>{formatLargeNumber(stockInfo.data['volume_avg'])}</td>
+                                <td>{formatLargeNumber(quote.avgTotalVolume)}</td>
                             </tr>
                             <tr>
                                 <th className="stock-info-label" scope="row">Market Cap</th>
-                                <td>{formatCurrency(stockInfo.data['market_cap'])}</td>
-                                <th className="stock-info-label" scope="row">Shares Outstanding</th>
-                                <td>{formatLargeNumber(stockInfo.data['shares'])}</td>
+                                <td>{formatCurrency(quote.marketCap)}</td>
                             </tr>
                             <tr>
                                 <th className="stock-info-label" scope="row">EPS</th>
-                                <td>{formatCurrency(stockInfo.data['eps'])}</td>
+                                <td>EPS</td>
                                 <th className="stock-info-label" scope="row">P/E Ratio</th>
-                                <td>{stockInfo.data['pe']}</td>
+                                <td>{quote.peRatio}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -102,7 +103,7 @@ class StockData extends React.Component {
                     </div>
                 </Col>
                 <Col>
-                    <StockHistoricalData stockInfo={stockInfo}/>
+                    <StockHistoricalData symbol={this.props.symbol} stockQuote={quote} stockChart={chart}/>
                 </Col>
             </Row>
         );

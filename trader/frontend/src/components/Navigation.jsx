@@ -6,7 +6,7 @@ import StockSearch from './StockSearch';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import Form from 'react-bootstrap/Form';
-import NavDropdown from 'react-bootstrap/NavDropdown';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 class Navigation extends React.Component {
     constructor(props) {
@@ -17,6 +17,7 @@ class Navigation extends React.Component {
     selectStock(stock){
         if(stock){
             this.props.setStockSymbol(stock.symbol);
+            this.props.getStockInfo(stock.symbol);
             this.props.history.push('/trade?quote=' + stock.symbol);
         }
     }
@@ -29,24 +30,27 @@ class Navigation extends React.Component {
                 <Navbar.Brand href="/account">Trader</Navbar.Brand>
                 <Navbar.Toggle aria-controls="trader-navbar" />
                 <Navbar.Collapse id="trader-navbar" className="justify-content-end">
-                    <Nav className="mr-auto">
+                    <Nav>
                         <Form inline>
                             <StockSearch selectStock={this.selectStock} />
                         </Form>
-                    </Nav>
-                    <Nav>
-                        <NavDropdown title={user.value} id="nav-dropdown">
-                            <NavDropdown.Item href="/account">
-                                My Account
-                            </NavDropdown.Item>
-                            <NavDropdown.Item href="/activity">
-                                My Activity
-                            </NavDropdown.Item>
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item href="/logout">
-                                Logout
-                            </NavDropdown.Item>
-                        </NavDropdown>
+                        <Dropdown id="nav-dropdown" alignRight>
+                            <Dropdown.Toggle id="user-dropdown" as={Nav.Link}>
+                                {user.value}
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                <Dropdown.Item href="/account">
+                                    My Account
+                                </Dropdown.Item>
+                                <Dropdown.Item href="/activity">
+                                    My Activity
+                                </Dropdown.Item>
+                                <Dropdown.Divider />
+                                <Dropdown.Item href="/logout">
+                                    Logout
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     </Nav>
                 </Navbar.Collapse>
             </Navbar>

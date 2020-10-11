@@ -6,13 +6,9 @@ from flask import current_app as app
 class IEXApi:
 
     def __init__(self):
-        if app.config['ENV'] == 'prod':
-            self.base_url = 'https://cloud.iexapis.com/stable'
-            self.token = app.config['IEX_SECRET_TOKEN']
-        else:
-            self.base_url = 'https://sandbox.iexapis.com/stable'
-            self.token = app.config['IEX_SB_SECRET_TOKEN']
-
+        self.base_url = app.config['IEX_API_URL']
+        self.token = app.config['IEX_SECRET_TOKEN']
+    
     def search_symbol(self, symbol):
         url = f"{self.base_url}/search/{symbol}?token={self.token}"
         try:

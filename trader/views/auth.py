@@ -27,7 +27,7 @@ def login():
     form = LoginForm(request.form)
     if form.validate_on_submit():
         with db.session_scope() as session:
-            user = authenticate_user(email, form.password.data)
+            user = authenticate_user(form.email.data, form.password.data)
             if not user:
                 return render_template('login.html', form=form, error=ResponseErrors.INVALID_LOGIN)
             

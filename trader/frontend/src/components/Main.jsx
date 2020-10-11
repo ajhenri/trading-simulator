@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { setStockSymbol } from 'actions';
+import { setStockSymbol, getStockInfo } from 'actions';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 
 import Navigation from './Navigation';
@@ -23,13 +23,13 @@ class Main extends React.Component {
     render() {
         return (
             <Router>
-                <Navigation setStockSymbol={this.props.setStockSymbol}/>
+                <Navigation setStockSymbol={this.props.setStockSymbol} getStockInfo={this.props.getStockInfo}/>
                 <Container className="container-main">
                     <Row>
                         <Route exact path="/">
                             <Redirect to="/account"/>
                         </Route>
-                        <Route path="/account" render={(props) => <Account {...props} />} />
+                        <Route path="/account" render={(props) => <Account {...props} setStockSymbol={this.props.setStockSymbol} />} />
                         <Route path="/trade" render={(props) => <Trade {...props} setStockSymbol={this.props.setStockSymbol} />} />
                         <Route path="/activity" render={(props) => <Activity {...props} />} />
                     </Row>
@@ -51,7 +51,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators(
-        { setStockSymbol },
+        { setStockSymbol, getStockInfo },
         dispatch
     );
 };

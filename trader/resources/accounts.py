@@ -41,7 +41,8 @@ class AccountResource(BaseResource):
                     'id': stock.id, 
                     'symbol': stock.symbol, 
                     'shares': stock.shares,
-                    'bought_at': format(stock.bought_at, '.2f')
+                    'bought_at': format(stock.bought_at, '.2f'),
+                    'cost': format(stock.bought_at*stock.shares, '.2f')
                 }
 
             stock_list = stocks.keys()
@@ -49,7 +50,10 @@ class AccountResource(BaseResource):
                 stock_data = self.iex_api.get_stock_data(stock_list)
                 for symb, stock in stock_data.items():
                     if symb in stocks:
-                        stocks[symb]['price'] = "{0:.2f}".format(float(stock['quote']['latestPrice']))
+                        shares = stocks[symb]['shares']
+                        price = float(stock['quote']['latestPrice'])
+                        stocks[symb]['price'] = "{0:.2f}".format(price)
+                        stocks[symb]['value'] = "{0:.2f}".format(price*shares)
 
             schema = AccountReadSchema()
             data = schema.dump(account)
@@ -161,17 +165,19 @@ class StockResource(BaseResource):
             return self.error_response(err.messages, HTTPStatus.BAD_REQUEST)
         
         with db.session_scope() as session:
-            account = session.query(Account).\
-                join(Account.stocks).\
-                filter(Account.id == account_id, Stock.id == stock_id, Stock.symbol == data['symbol']).first()
-
+            account = session.query(Account).join(Account.stocks).\
+                filter(Account.id == account_id).first()
             if not account:
+                return self.error_response(ResponseErrors.ACCOUNT_DNE, HTTPStatus.NOT_FOUND)
+            
+            stock = [v for i,v in enumerate(account.stocks) if v.symbol == data['symbol']][0]
+            if not stock:
                 return self.error_response(ResponseErrors.STOCK_DNE, HTTPStatus.NOT_FOUND)
             if account.user_id != current_user.id:
                 return self.error_response(ResponseErrors.ACCOUNT_NO_ACCESS, HTTPStatus.FORBIDDEN)
             
             delete_flag = False
-            stock = account.stocks[0]
+
             if data['trade_type'] == 'buy':
                 cost = data['amount'] + Account.BROKERAGE_FEE
                 if account.cash_amount < cost:
@@ -203,7 +209,9 @@ class StockResource(BaseResource):
             session.add(trade)
 
             if delete_flag:
-                session.query(Stock).filter(Stock.id==stock_id).delete()
+                session.query(Stock).filter(Stock.id==stock.id).delete()
+            else:
+                session.add(stock)
 
         return self.success_response('ok')
 

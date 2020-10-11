@@ -6,8 +6,14 @@
 </head>
 <body>
     {% block content %}{% endblock %}
-    {% if current_user.is_authenticated %}
+    {% if current_user and current_user.is_authenticated %}
         <input type="hidden" name="logged_in_user" value="{{ current_user.first_name }}" />
     {% endif %}
-    <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='dist/bundle.js') }}"></script>
+    {% if env == 'production' %}
+        <script type="text/javascript" language="javascript" 
+            src="{{ url_for('static', filename='dist/bundle.js') }}"></script>
+    {% else %}
+        <script type="text/javascript" language="javascript" 
+            src="{{dev_server}}/bundle.js"></script>
+    {% endif %}
 </body>

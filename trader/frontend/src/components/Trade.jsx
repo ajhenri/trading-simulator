@@ -4,7 +4,7 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { getAccountInfo, getStockInfo, buyStock } from 'actions';
+import { getAccountInfo, getStockInfo, buyNewStock, tradeExistingStock } from 'actions';
 import Dialog from './Dialog';
 import StockData from './StockData';
 
@@ -49,8 +49,9 @@ class Trade extends React.Component {
             let url = new URL(location.href);
             let quote = url.searchParams.get('quote');
             if(quote){
+                console.log(quote);
                 this.props.setStockSymbol(quote);
-                this.props.getStockInfo(quote, 5);
+                this.props.getStockInfo(quote);
             }
         }
         this.props.getAccountInfo();
@@ -71,17 +72,19 @@ class Trade extends React.Component {
     handleFieldChange(event){
         let state = this.state;
 
-        if(event.target.name == 'Buy'){
+        if(event.target && event.target.name){
+            if(event.target.name == 'Buy'){
 
+            }
+    
+            state[event.target.name] = event.target.value;
+            this.setState(state);
         }
-
-        state[event.target.name] = event.target.value;
-        this.setState(state);
     }
 
     buyStock(){
         const { stockInfo, accountInfo } = this.props;
-        this.props.buyStock(accountInfo.id, stockInfo.data.symbol, this.state.numberOfShares, stockInfo.data.price);
+        this.props.buyNewStock(accountInfo.id, stockInfo.data.symbol, this.state.numberOfShares, stockInfo.data.price);
     }
 
     render() {
@@ -95,9 +98,13 @@ class Trade extends React.Component {
         console.log(stockInfo);
         console.log(accountInfo);
 
-        if(!accountInfo || !stockInfo) return (<div/>);
-        const maximumShares = Math.floor(parseFloat(accountInfo.cash_amount)/parseFloat(stockInfo.data.price));
+        if(!accountInfo || !stockInfo || !stockInfo[selectedStockSymbol]) return (<div/>);
+        const s = stockInfo[selectedStockSymbol];
+        const maximumShares = Math.floor(parseFloat(accountInfo.cash_amount)/parseFloat(s['quote']['price']));
         
+        console.log('trade..');
+        console.log(s);
+        console.log(s['quote']['price']);
         return (
             <div>
                 {   selectedStockSymbol && 
@@ -160,7 +167,7 @@ Trade.propTypes = {
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators(
-        { getAccountInfo, getStockInfo, buyStock },
+        { getAccountInfo, getStockInfo, buyNewStock, tradeExistingStock },
         dispatch
     );
 }

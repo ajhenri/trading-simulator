@@ -4,7 +4,7 @@ import {
     SEARCH_STOCKS,
     GET_STOCK_INFO,
     SET_STOCK_SYMBOL,
-    BUY_STOCK
+    TRADE_STOCK
 } from 'actions';
 
 const INITIAL_STATE = {};
@@ -86,22 +86,22 @@ const rootReducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 selectedStockSymbol: action.data
             };
-        case BUY_STOCK.REQUEST:
+        case TRADE_STOCK.REQUEST:
             return {
                 ...state,
                 isTradingStock: true
             };
-        case BUY_STOCK.SUCCESS:
+        case TRADE_STOCK.SUCCESS:
             return {
                 ...state,
                 isTradingStock: false,
-                buyStockResult: action.data
+                tradeStockResult: action.data
             };
-        case BUY_STOCK.ERROR:
+        case TRADE_STOCK.ERROR:
             return {
                 ...state,
                 isTradingStock: false,
-                buyStockError: action.data
+                tradeStockError: action.data
             };
         default:
             return state;

@@ -9,7 +9,7 @@ export const GET_ACCOUNT_INFO = createDispatchActions('GET_ACCOUNT_INFO');
 export const SEARCH_STOCKS = createDispatchActions('SEARCH_STOCKS');
 export const GET_STOCK_INFO = createDispatchActions('GET_STOCK_INFO');
 export const SET_STOCK_SYMBOL = 'SET_STOCK_SYMBOL';
-export const BUY_STOCK = createDispatchActions('BUY_STOCK');
+export const TRADE_STOCK = createDispatchActions('TRADE_STOCK');
 
 export function createAccount(data){
     return dispatch => {
@@ -80,13 +80,13 @@ export function setStockSymbol(symbol){
     };
 }
 
-export function getStockInfo(symbol, days){
+export function getStockInfo(symbol){
     return dispatch => {
         dispatch({
             type: GET_STOCK_INFO.REQUEST
         });
 
-        axios.get(`${baseURL}/exchange/history/${symbol}?days=${days}`).then((response) => {
+        axios.get(`${baseURL}/exchange?stock=${symbol}`).then((response) => {
             dispatch({
                 type: GET_STOCK_INFO.SUCCESS,
                 data: response.data
@@ -100,10 +100,10 @@ export function getStockInfo(symbol, days){
     };
 }
 
-export function buyStock(account_id, symbol, shares, price){
+export function buyNewStock(account_id, symbol, shares, price){
     return dispatch => {
         dispatch({
-            type: BUY_STOCK.REQUEST
+            type: TRADE_STOCK.REQUEST
         });
 
         axios.post(`${baseURL}/accounts/${account_id}/stocks`, {
@@ -112,12 +112,39 @@ export function buyStock(account_id, symbol, shares, price){
             'price': price
         }).then((response) => {
             dispatch({
-                type: BUY_STOCK.SUCCESS,
+                type: TRADE_STOCK.SUCCESS,
                 data: response.data
             });
         }).catch((error) => {
             dispatch({
-                type: BUY_STOCK.ERROR,
+                type: TRADE_STOCK.ERROR,
+                data: error.response
+            });
+        });
+    };
+}
+
+export function tradeExistingStock(account_id, stock_id, data){
+    return dispatch => {
+        dispatch({
+            type: TRADE_STOCK.REQUEST
+        });
+
+        // data = {
+        //     'symbol': symbol,
+        //     'shares': shares,
+        //     'price': price,
+        //     'trade_type': trade_type
+        // }
+
+        axios.post(`${baseURL}/accounts/${account_id}/stocks/${stock_id}`, data).then((response) => {
+            dispatch({
+                type: TRADE_STOCK.SUCCESS,
+                data: response.data
+            });
+        }).catch((error) => {
+            dispatch({
+                type: TRADE_STOCK.ERROR,
                 data: error.response
             });
         });

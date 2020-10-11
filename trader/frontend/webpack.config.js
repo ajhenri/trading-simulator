@@ -22,6 +22,12 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader']
+            },
+            {
+                test: /\.(jpg|png)$/,
+                use: {
+                    loader: 'url-loader'
+                }
             }
         ]
     },
@@ -35,5 +41,5 @@ module.exports = {
     optimization: {
         minimize: true
     },
-    mode: "development"
+    mode: "production"
 };

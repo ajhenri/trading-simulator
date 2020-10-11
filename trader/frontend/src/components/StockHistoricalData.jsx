@@ -12,8 +12,7 @@ var moment = require('moment');
 
 const mapStateToProps = (state) => {
     return {
-        isRequestingStockInfo: state.isRequestingStockInfo,
-        stockInfo: state.stockInfo
+        isRequestingStockInfo: state.isRequestingStockInfo
     };
 };
 
@@ -24,17 +23,17 @@ class StockHistoricalData extends React.Component {
     }
 
     render(){
-        const { stockInfo } = this.props;
-        if(!stockInfo){
+        const { symbol, stockChart, stockQuote } = this.props;
+
+        if(!stockChart){
             return <div/>
         }
 
-        let history = stockInfo.history;
         let dataPoints = [];
-        for(const day in history){
+        for(const i in stockChart){
             dataPoints.push({
-                'x': moment(day),
-                'y': history[day].open
+                'x': moment(stockChart[i].date),
+                'y': stockChart[i].close
             });
         }
         dataPoints.sort((a, b) => {
@@ -42,18 +41,18 @@ class StockHistoricalData extends React.Component {
         });
 
         for(let i=0; i<dataPoints.length; i++){
-            dataPoints[i]['x'] = dataPoints[i]['x'].format('dddd');
+            dataPoints[i]['x'] = dataPoints[i]['x'].format('MMM Do');
         }
 
-        const data = [{ "id": stockInfo.data['symbol'], "data": dataPoints }];
-
-        console.log(stockInfo);
+        // Show only the last 5 days for now.
+        dataPoints = dataPoints.slice(-5);
+        const data = [{ "id": symbol, "data": dataPoints }];
 
         return (
             <div className="stock-chart" style={{height: 320}}>
                 <ResponsiveLine
                     data={data}
-                    margin={{ top: 40, right: 110, bottom: 60, left: 60 }}
+                    margin={{ top: 40, right: 50, bottom: 60, left: 60 }}
                     xScale={{ type: 'point' }}
                     yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: true, reverse: false }}
                     axisTop={null}
@@ -96,7 +95,9 @@ class StockHistoricalData extends React.Component {
 }
 
 StockHistoricalData.propTypes = {
-    stockInfo: PropTypes.object
+    symbol: PropTypes.string,
+    stockChart: PropTypes.array,
+    stockQuote: PropTypes.object
 }
 
 const mapDispatchToProps = (dispatch) => {

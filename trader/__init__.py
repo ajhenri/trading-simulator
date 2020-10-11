@@ -6,11 +6,12 @@ import logging.handlers
 import datetime
 import traceback
 
-from flask import Flask, Blueprint, request, redirect, render_template
+from flask import Flask, Blueprint, request, redirect, render_template, current_app
 from werkzeug.exceptions import HTTPException
 from flask_login import LoginManager, login_required
 from flask_wtf.csrf import CSRFProtect
 
+from trader.config import DevConfig, ProdConfig
 from trader.models import User
 from trader.extensions import ma, db
 from trader.views.auth import auth_bp, authenticate_user
@@ -29,9 +30,13 @@ logging.basicConfig(
 )
 
 def create_app():
-    app = Flask(__name__, instance_relative_config=True, template_folder='templates', 
-        static_folder='frontend')
-    app.config.from_pyfile('config.py', silent=True)
+    app = Flask(__name__, template_folder='templates', static_folder='frontend')
+
+    env = os.environ.get('FLASK_ENV')
+    if env == 'production':
+        app.config.from_object(ProdConfig)
+    else:
+        app.config.from_object(DevConfig)
 
     db.init_app(app)
 
@@ -51,6 +56,9 @@ def create_app():
 
     @login_manager.request_loader
     def load_user_from_request(request):
+        if request.method == "GET" and 'login' in request.path:
+            return None
+        
         auth_header = request.headers.get('Authorization')
         if auth_header:
             auth_header = auth_header.replace('Basic ', '', 1)
@@ -59,10 +67,11 @@ def create_app():
             credentials = credentials.split(':')
             
             user = authenticate_user(credentials[0], credentials[1])
+            return user
         except TypeError as e:
             logging.error({'exception': str(e)})
         
-        return user
+        return None
 
     @app.route("/test")
     def test():
@@ -75,7 +84,8 @@ def create_app():
     @app.route('/activity', endpoint='activty')
     @login_required
     def index():
-        return render_template('index.html')
+        return render_template('index.html', env=current_app.config['ENV'],
+            dev_server=current_app.config['WEBPACK_DEV_SERVER'])
 
     @app.context_processor
     def inject_date():

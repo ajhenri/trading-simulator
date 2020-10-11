@@ -39,7 +39,7 @@ class StockSearch extends React.Component {
     renderItem(item, props){
         return (
             <div key={item.symbol}>
-                {item.symbol + ' - ' + item.name}
+                {item.symbol + ' - ' + item.securityName}
             </div>
         );
     }
