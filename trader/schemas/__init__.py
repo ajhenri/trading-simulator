@@ -33,7 +33,7 @@ class AccountReadSchema(ma.Schema):
     id = ma.Integer()
     user_id = ma.Integer()
     amt_change = ma.Decimal(places=2, as_string=True)
-    pct_change = ma.Decimal(places=1, as_string=True)
+    pct_change = ma.Decimal(places=2, as_string=True)
     cash_amount = ma.Decimal(places=2, as_string=True)
     total_amount = ma.Decimal(places=2, as_string=True)
     equity_amount = ma.Decimal(places=2, as_string=True)
@@ -49,10 +49,10 @@ class AccountReadSchema(ma.Schema):
         data.total_amount = data.cash_amount + data.equity_amount
         if data.total_amount < data.initial_amount:
             data.amt_change = data.total_amount - data.initial_amount
-            data.pct_change = (-1)*(data.amt_change/data.initial_amount)*100
+            data.pct_change = (-1)*round(abs(data.amt_change)/data.initial_amount, 2)*100
         elif data.initial_amount < data.total_amount:
             data.amt_change = data.total_amount - data.initial_amount
-            data.pct_change = (data.amt_change/data.initial_amount)*100
+            data.pct_change = round(data.amt_change/data.initial_amount, 2)*100
         else:
             data.amt_change = 0
             data.pct_change = 0
