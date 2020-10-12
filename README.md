@@ -4,8 +4,8 @@ This is a small stock trading simulator built with Python using the Flask framew
 The project is currently a work in progress.
 
 ## Requirements
-Docker
-IEX API Key
+Docker  
+IEX API Key  
 
 ### Configuring API Keys and DB Environment
 
@@ -39,13 +39,13 @@ IEX_SB_SECRET_TOKEN = 'token'
 
 Build the Docker images and setup database tables by running the Alembic migrations.
 
-`make build`
-`make migrate-up`
+`make build`  
+`make migrate-up`  
 
 If the `FLASK_ENV` is set to `development`, then the webpack-dev-server has to be running (`npm run start` in the /frontend static folder).
 
-`make up`
+`make up`  
 
-## Demo Image
+## Demo Image  
 
 ![Demo](https://user-images.githubusercontent.com/7053830/95796709-96010900-0cbb-11eb-9a2b-dad378cfc3ed.png "Demo") 
