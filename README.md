@@ -45,3 +45,7 @@ Build the Docker images and setup database tables by running the Alembic migrati
 If the `FLASK_ENV` is set to `development`, then the webpack-dev-server has to be running (`npm run start` in the /frontend static folder).
 
 `make up`
+
+## Demo Image
+
+![Demo](https://user-images.githubusercontent.com/7053830/95796709-96010900-0cbb-11eb-9a2b-dad378cfc3ed.png "Demo") 
