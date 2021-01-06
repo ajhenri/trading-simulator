@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@nivo/line": "^0.61.1",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bootstrap": "^4.4.1",
     "connected-react-router": "^6.8.0",
     "immutable": "^3.8.2",
